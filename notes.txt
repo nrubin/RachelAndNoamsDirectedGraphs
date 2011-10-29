@@ -1,0 +1,1 @@
+Create exercise for case study: have reader implement is_symmetric (see en.wikipedia.org/wiki/Directed_graph)
