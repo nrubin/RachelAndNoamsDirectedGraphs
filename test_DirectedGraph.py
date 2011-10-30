@@ -30,5 +30,26 @@ class TestDirectedGraph(unittest.TestCase):
         self.assertEqual(dg[w], {})
         self.assertEqual(dg.inverse_graph[v], {})
 
+	def test_in_out_degrees(self):
+		
+		v = Vertex('v')
+        w = Vertex('w')
+        x = Vertex('x')
+        e = DirectedEdge(v, w)
+
+        dg = DirectedGraph([v, w], [e])
+        
+        
+        self.assertEqual(dg.out_degree(v),1)
+        self.assertEqual(dg.in_degree(w),1)
+        
+        self.assertEqual(dg.out_degree(x),None)
+        self.assertEqual(dg.in_degree(x),None)
+        
+        dg.remove_edge(v,w)
+        
+        self.assertEqual(dg.out_degree(v),0)
+        self.assertEqual(dg.in_degree(w),0)
+		
 if __name__== "__main__":
     unittest.main()
