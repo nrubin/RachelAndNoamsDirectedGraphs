@@ -174,7 +174,8 @@ class Graph(dict):
             self.add_edge(Edge(v, w))
 
     def bfs(self, s, visit=None):
-        """Breadth first search.
+        """
+        Breadth first search.
 
         s: start vertex
         visit: function called on each vertex

@@ -26,13 +26,13 @@ class TestDirectedGraph(unittest.TestCase):
         dg.remove_edge(v, w)
 
         self.assertEqual(dg[v],{})
-        self.assertEqual(dg.inverse_graph[w],{})
+        self.assertEqual(dg.invercdse_graph[w],{})
         self.assertEqual(dg[w], {})
         self.assertEqual(dg.inverse_graph[v], {})
 
-	def test_in_out_degrees(self):
-		
-		v = Vertex('v')
+    def test_in_out_degrees(self):
+        
+        v = Vertex('v')
         w = Vertex('w')
         x = Vertex('x')
         e = DirectedEdge(v, w)
@@ -50,6 +50,19 @@ class TestDirectedGraph(unittest.TestCase):
         
         self.assertEqual(dg.out_degree(v),0)
         self.assertEqual(dg.in_degree(w),0)
-		
+    
+    def test_is_connected(self):
+        v = Vertex('v')
+        w = Vertex('w')
+        e1 = DirectedEdge(v, w)
+        e2 = DirectedEdge(w,v)
+
+        dg = DirectedGraph([v, w], [e1,e2])
+        self.assertEqual(dg.is_strongly_connected(),True)
+        
+        dg.remove_edge(w,v)
+        
+        self.assertEqual(dg.is_strongly_connected(),False)
+        
 if __name__== "__main__":
     unittest.main()
