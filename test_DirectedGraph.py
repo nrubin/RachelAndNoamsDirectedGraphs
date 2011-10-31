@@ -64,9 +64,9 @@ class TestDirectedGraph(unittest.TestCase):
         
         self.assertEqual(dg.is_strongly_connected(),False)
 
-	def test_complete(self):
-		"""a two-vertex complete graph is strongly connected."""
-		v = Vertex('v')
+    def test_complete(self):
+        """a two-vertex complete graph is strongly connected."""
+        v = Vertex('v')
         w = Vertex('w')
         
         dg = DirectedGraph([v,w])
@@ -76,15 +76,35 @@ class TestDirectedGraph(unittest.TestCase):
         self.assertTrue(dg.is_strongly_connected())
         
     def test_is_complete(self):
-		v = Vertex('v')
-		w = Vertex('w')
-		
-		dg = DirectedGraph([v,w])
-		
-		dg.complete()
-		
-		self.assertTrue(dg.is_complete())
-		
+        v = Vertex('v')
+        w = Vertex('w')
+        
+        dg = DirectedGraph([v,w])
+        
+        dg.complete()
+        
+        self.assertTrue(dg.is_complete())
+    
+    def test_correct_inverse_graph(self):
+        """checks that every out-edge in dg also exists as an in-edge
+        in dg.inverse_graph"""
+        v = Vertex('v')
+        w = Vertex('w')
+        
+        dg = DirectedGraph([v,w])
+        
+        dg.complete()
+        
+        out_edges = set()
+        in_edges = set()
+        for v in dg.keys():
+            for key,val in dg[v].items():
+                out_edges.update(val)
+        for w in dg.inverse_graph.keys():
+            for key,val in dg.inverse_graph[w].items():
+                in_edges.update(val)
+    
+        self.assertEqual(out_edges,in_edges)
 
 if __name__== "__main__":
     unittest.main()

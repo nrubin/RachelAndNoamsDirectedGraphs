@@ -136,3 +136,11 @@ class DirectedGraph(Graph):
             if len(out_vertices) != len(self.vertices())-1:
                 return False
         return True
+        
+if __name__ == '__main__':
+    v = Vertex('v')
+    w = Vertex('w')
+    e = DirectedEdge(v,w)
+    dg = DirectedGraph([v,w],[e])
+    
+    print type(dg[v])
