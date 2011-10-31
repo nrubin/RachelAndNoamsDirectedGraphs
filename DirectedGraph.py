@@ -62,8 +62,15 @@ class DirectedGraph(Graph):
         del self.inverse_graph[w][v]
 
     def edges(self):
+        """returns a set of all out-edges of the graph"""
         s = set()
         for d in self.itervalues():
+            s.update(d.itervalues())
+        return s
+    
+    def in_edges(self):
+        s = set()
+        for d in self.inverse_graph.itervalues():
             s.update(d.itervalues())
         return s
     
@@ -106,5 +113,26 @@ class DirectedGraph(Graph):
                 queue.extend(self.out_vertices(w))
             #end bfs
             if visited_count != len(self.vertices()):
+                return False
+        return True
+    
+    def complete(self):
+        """completes the graph by adding an edge from every vertex
+        to every vertex"""
+        for v in self.vertices():
+            current_vertex = v
+            for w in self.vertices():
+                if current_vertex == w:
+                    continue
+                e = DirectedEdge(current_vertex,w)
+                self.add_edge(e)
+                
+    def is_complete(self):
+        """checks if a graph is complete by ensuring that
+        every vertex is adjacent to every other vertex in
+        the graph"""
+        for v in self.vertices():
+            out_vertices = self.out_vertices(v)
+            if len(out_vertices) != len(self.vertices())-1:
                 return False
         return True

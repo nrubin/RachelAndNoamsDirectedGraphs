@@ -26,7 +26,7 @@ class TestDirectedGraph(unittest.TestCase):
         dg.remove_edge(v, w)
 
         self.assertEqual(dg[v],{})
-        self.assertEqual(dg.invercdse_graph[w],{})
+        self.assertEqual(dg.inverse_graph[w],{})
         self.assertEqual(dg[w], {})
         self.assertEqual(dg.inverse_graph[v], {})
 
@@ -63,6 +63,28 @@ class TestDirectedGraph(unittest.TestCase):
         dg.remove_edge(w,v)
         
         self.assertEqual(dg.is_strongly_connected(),False)
+
+	def test_complete(self):
+		"""a two-vertex complete graph is strongly connected."""
+		v = Vertex('v')
+        w = Vertex('w')
         
+        dg = DirectedGraph([v,w])
+        
+        dg.complete()
+        
+        self.assertTrue(dg.is_strongly_connected())
+        
+    def test_is_complete(self):
+		v = Vertex('v')
+		w = Vertex('w')
+		
+		dg = DirectedGraph([v,w])
+		
+		dg.complete()
+		
+		self.assertTrue(dg.is_complete())
+		
+
 if __name__== "__main__":
     unittest.main()
