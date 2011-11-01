@@ -90,10 +90,11 @@ class TestDirectedGraph(unittest.TestCase):
         in dg.inverse_graph"""
         v = Vertex('v')
         w = Vertex('w')
+        e = DirectedEdge(v,w)
         
-        dg = DirectedGraph([v,w])
+        dg = DirectedGraph([v,w],[e])
         
-        dg.complete()
+        #~ dg.complete()
         
         out_edges = set()
         in_edges = set()
