@@ -89,31 +89,31 @@ class DirectedGraph(Graph):
             return len(self.inverse_graph[v])
         except KeyError:
             return None
-            
+
+
+
     def is_strongly_connected(self):
         """iterates through every vertex in the graph, checking
         connectedness. If the graph is connected through every vertex,
         the the  directed graph is strongly connected."""
-        
+        def visit(v):
+            self.visited_count += 1
+
         for v in self.vertices():
             v.visited = False
             
         for v in self.vertices():
-            visited_count = 0
+            self.visited_count = 0
             for x in self.vertices():
                 x.visited = False
             s = v
             #start bfs
-            queue = [s]
-            while queue:
-                w = queue.pop(0)
-                if w.visited: continue
-                w.visited = True
-                visited_count += 1
-                queue.extend(self.out_vertices(w))
+            self.bfs(s, visit = visit)
             #end bfs
-            if visited_count != len(self.vertices()):
+            if self.visited_count != len(self.vertices()):
+                self.visited_count = None
                 return False
+        self.visited_count = None
         return True
     
     def complete(self):
