@@ -1,5 +1,5 @@
 from Graph import Graph, Vertex, Edge
-import GraphWorld
+#import GraphWorld
 
 class DirectedVertex(Vertex):
     pass
@@ -69,12 +69,18 @@ class DirectedGraph(Graph):
             s.update(d.itervalues())
         return s
     
-    def in_edges(self):
+    def in_edges(self, v):
         s = set()
-        for d in self.inverse_graph.itervalues():
-            s.update(d.itervalues())
+        for w in self.inverse_graph[v]:
+            s.update(self.inverse_graph[v][w])
         return s
-    
+
+    def out_edges(self, v):
+        s = set()
+        for w in self[v]:
+            s.update(self[v][w])
+        return s
+
     def out_degree(self,v):
         """takes a vertex and returns the number of 
         edges leaving it (the out-degree)"""
@@ -108,9 +114,9 @@ class DirectedGraph(Graph):
             for x in self.vertices():
                 x.visited = False
             s = v
-            #start bfs
+
             self.bfs(s, visit = visit)
-            #end bfs
+
             if self.visited_count != len(self.vertices()):
                 self.visited_count = None
                 return False
@@ -137,7 +143,41 @@ class DirectedGraph(Graph):
             if len(out_vertices) != len(self.vertices())-1:
                 return False
         return True
- 
+
+    def cluster(self, v):
+        es = 0.0
+        for w in self[v]:
+            for u in self[v]:
+                try:
+                    self[w][u]
+                    print "edges in neighborhood of %s: %s" %(v, self[v][w])
+                    es += 1
+                except KeyError:
+                    pass
+
+        for w in self.inverse_graph[v]:
+            for u in self.inverse_graph[v]:
+                try:
+                    self.inverse_graph[w][u]
+                    print "edges in inverse of %s: %s" %(v, self.inverse_graph[v][w])
+                    es += 1
+                except KeyError:
+                    pass
+
+        k = len(self[v]) + len(self.inverse_graph[v])
+        try: 
+            c = es / (k * (k-1))
+        except ZeroDivisionError:
+            c = es / (k * 1)
+        print v, c
+        return c
+
+    def clustering_coefficient(self):
+        local_cs = [self.cluster(v) for v in self.keys()]
+        c = sum(local_cs) / len(local_cs)
+
+        return c
+
 
 def show_graph(g):
     for v in g.vertices():
@@ -155,8 +195,12 @@ def show_graph(g):
 if __name__ == '__main__':
     v = Vertex('v')
     w = Vertex('w')
+    x = Vertex('x')
     e = DirectedEdge(v,w)
-    dg = DirectedGraph([v,w],[e])
-    show_graph(dg)
+    e2 = DirectedEdge(x, w)
+    e3 = DirectedEdge(x, v)
+    dg = DirectedGraph([v, w, x],[e, e2, e3])
+    print dg.clustering_coefficient()
+    #show_graph(dg)
     
     
