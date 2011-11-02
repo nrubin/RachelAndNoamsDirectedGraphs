@@ -153,14 +153,17 @@ class DirectedGraph(Graph):
 
         for w in neighbors:
             for u in neighbors:
-                if self.get(v
+                try:
+					self[w][u]
+					es += 1.0
+                except KeyError:
+					pass
 
         k = len(self[v]) + len(self.inverse_graph[v])
         try: 
             c = es / (k * (k-1))
         except ZeroDivisionError:
             c = es / (k * 1)
-        print v, c
         return c
 
     def clustering_coefficient(self):

@@ -106,6 +106,17 @@ class TestDirectedGraph(unittest.TestCase):
                 in_edges.update(val)
     
         self.assertEqual(out_edges,in_edges)
+    
+    def test_clustering_coefficient(self):
+        """tests the clustering coefficent"""
+        v = Vertex('v')
+        w = Vertex('w')
+        x = Vertex('x')
+        e = DirectedEdge(v,w)
+        e2 = DirectedEdge(x, w)
+        e3 = DirectedEdge(x, v)
+        dg = DirectedGraph([v, w, x],[e, e2, e3])
+        self.assertAlmostEqual(dg.clustering_coefficient(),0.5)
 
 if __name__== "__main__":
     unittest.main()
