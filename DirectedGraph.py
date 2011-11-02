@@ -30,6 +30,8 @@ class DirectedGraph(Graph):
         Adds same edge TO W FROM V (in W's second dicionary).
         """
         v, w = e
+        if v == w:
+			raise LoopError('An Edge cannot exist from a vertex to itself.')
         self[v][w] = e
         self.inverse_graph[w][v] = e
         
@@ -138,6 +140,14 @@ class DirectedGraph(Graph):
                 return False
         return True
  
+class LoopError(Exception):
+	
+    def __init__(self, value):
+		self.parameter = value
+		
+    def __str__(self):
+        return repr(self.parameter)
+ 
 
 def show_graph(g):
     for v in g.vertices():
@@ -156,7 +166,7 @@ if __name__ == '__main__':
     v = Vertex('v')
     w = Vertex('w')
     e = DirectedEdge(v,w)
-    dg = DirectedGraph([v,w],[e])
-    show_graph(dg)
+    e2 = DirectedEdge(v,v)
+    dg = DirectedGraph([v,w],[e,e2])
     
     
