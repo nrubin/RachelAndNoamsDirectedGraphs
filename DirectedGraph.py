@@ -148,23 +148,12 @@ class DirectedGraph(Graph):
         
     def cluster(self, v):
         es = 0.0
-        for w in self[v]:
-            for u in self[v]:
-                try:
-                    self[w][u]
-                    print "edges in neighborhood of %s: %s" %(v, self[v][w])
-                    es += 1
-                except KeyError:
-                    pass
+        neighbors = self[v].keys()
+        neighbors.extend(self.inverse_graph[v].keys())
 
-        for w in self.inverse_graph[v]:
-            for u in self.inverse_graph[v]:
-                try:
-                    self.inverse_graph[w][u]
-                    print "edges in inverse of %s: %s" %(v, self.inverse_graph[v][w])
-                    es += 1
-                except KeyError:
-                    pass
+        for w in neighbors:
+            for u in neighbors:
+                if self.get(v
 
         k = len(self[v]) + len(self.inverse_graph[v])
         try: 
