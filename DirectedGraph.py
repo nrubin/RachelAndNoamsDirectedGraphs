@@ -1,4 +1,5 @@
 from Graph import Graph, Vertex, Edge
+import GraphWorld
 
 class DirectedVertex(Vertex):
     pass
@@ -136,11 +137,26 @@ class DirectedGraph(Graph):
             if len(out_vertices) != len(self.vertices())-1:
                 return False
         return True
+ 
+
+def show_graph(g):
+    for v in g.vertices():
+        """if v.visited: 
+            v.color = 'white'
+        else:
+            v.color = 'red'"""
+        v.color='red'
+
+    layout = GraphWorld.CircleLayout(g)
+    gw = GraphWorld.GraphWorld(directed=True)
+    gw.show_graph(g, layout)
+    gw.mainloop()
         
 if __name__ == '__main__':
     v = Vertex('v')
     w = Vertex('w')
     e = DirectedEdge(v,w)
     dg = DirectedGraph([v,w],[e])
+    show_graph(dg)
     
-    print type(dg[v])
+    

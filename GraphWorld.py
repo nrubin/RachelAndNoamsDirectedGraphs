@@ -21,6 +21,7 @@ from Graph import Edge
 from Graph import Graph
 
 
+
 class GraphCanvas(GuiCanvas):
     """a GraphCanvas is a canvas that knows how to draw Vertices
     and Edges"""
@@ -46,16 +47,35 @@ class GraphCanvas(GuiCanvas):
         tag = self.line([v.pos, w.pos])
         return tag
 
+class DirectedGraphCanvas(GraphCanvas):
+    def draw_edge(self, e):
+        """Draw a directed edge as a line with an arrow"""
+        v, w = e
+        vx, vy = v.pos
+        wx, wy = w.pos
+
+        y = math.fabs(vy) + math.fabs(wy)
+        x = math.fabs(vx) + math.fabs(wx)
+        theta = math.atan2(y, x)
+        if vx >= 0 and vy >= 0:
+            vshift = 
+        
+        wshift = (wx - .45 * math.cos(theta), wy - .45 * math.sin(theta))
+        vshift = (vx - .45 * math.cos(theta), vy - .45 * math.sin(theta))
+
+        tag = self.line([vshift, wshift], arrow="last", arrowshape="20 20 8")
+        return tag
 
 class GraphWorld(Gui):
     """GraphWorld is a Gui that has a Graph Canvas and control buttons."""
     
-    def __init__(self):
+    def __init__(self, directed=False):
         Gui.__init__(self)
         self.title('GraphWorld')
-        self.setup()
+        self.setup(directed)
+ 
 
-    def setup(self):
+    def setup(self, directed):
         """Create the widgets."""
         self.ca_width = 400
         self.ca_height = 400
@@ -64,7 +84,11 @@ class GraphWorld(Gui):
 
         # canvas
         self.col()
-        self.canvas = self.widget(GraphCanvas, scale=[xscale, yscale],
+        if directed:
+            c = DirectedGraphCanvas
+        else:
+            c = GraphCanvas
+        self.canvas = self.widget(c, scale=[xscale, yscale],
                               width=self.ca_width, height=self.ca_height,
                               bg='white')
         
@@ -89,6 +113,7 @@ class GraphWorld(Gui):
         self.etags = {}
         for v in g:
             self.etags[v] = [c.draw_edge(e) for e in g.out_edges(v)]
+
 
         # draw the vertices and store their tags in a list
         self.vtags = [c.draw_vertex(v) for v in g]
