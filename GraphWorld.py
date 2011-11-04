@@ -20,6 +20,8 @@ from Graph import Vertex
 from Graph import Edge
 from Graph import Graph
 
+from DirectedGraph import *
+
 
 
 class GraphCanvas(GuiCanvas):
@@ -53,18 +55,18 @@ class DirectedGraphCanvas(GraphCanvas):
         v, w = e
         vx, vy = v.pos
         wx, wy = w.pos
-        r = 0.45
-        d = (wx-vx,wy-vy)
-        vshift = (vx + r*d[0], vy + r*d[1])
-        wshift = (wx + r*d[0], vy + r*d[1])
-        #~ y = math.fabs(vy) + math.fabs(wy)
-        #~ x = math.fabs(vx) + math.fabs(wx)
-        #~ theta = math.atan2(y, x)
+        #~ r = 0.45
+        #~ d = (wx-vx,wy-vy)
+        #~ vshift = (vx + r*d[0], vy + r*d[1])
+        #~ wshift = (wx + r*d[0], vy + r*d[1])
+        y = math.fabs(vy) + math.fabs(wy)
+        x = math.fabs(vx) + math.fabs(wx)
+        theta = math.atan2(y, x)
         #~ if vx >= 0 and vy >= 0:
             #~ vshift = 
         
-        #~ wshift = (wx - .45 * math.cos(theta), wy - .45 * math.sin(theta))
-        #~ vshift = (vx - .45 * math.cos(theta), vy - .45 * math.sin(theta))
+        wshift = (wx - .45 * math.cos(theta), wy - .45 * math.sin(theta))
+        vshift = (vx - .45 * math.cos(theta), vy - .45 * math.sin(theta))
 
         tag = self.line([vshift, wshift], arrow="last", arrowshape="20 20 8")
         return tag
@@ -213,20 +215,26 @@ class RandomLayout(Layout):
 
 def main(script, n='10', *args):
 
-    # create n Vertices
-    n = int(n)
-    labels = string.ascii_lowercase + string.ascii_uppercase
-    vs = [Vertex(c) for c in labels[:n]]
-
-    # create a graph and a layout
-    g = Graph(vs)
-    g.add_all_edges()
-    layout = CircleLayout(g)
-
-    # draw the graph
-    gw = GraphWorld()
-    gw.show_graph(g, layout)
+    #~ # create n Vertices
+    #~ n = int(n)
+    #~ labels = string.ascii_lowercase + string.ascii_uppercase
+    #~ vs = [Vertex(c) for c in labels[:n]]
+#~ 
+    #~ # create a graph and a layout
+    #~ g = Graph(vs)
+    #~ g.add_all_edges()
+#~ 
+    #~ # draw the graph
+    gw = GraphWorld(directed=True)
+    #~ gw.show_graph(g, layout)
+    #~ gw.mainloop()
+    vs = [Vertex(str(x)) for x in range(100)]
+    rdg = DirectedRandomGraph(vs)
+    rdg.add_random_edges(p=.2)
+    layout = CircleLayout(rdg)
+    gw.show_graph(rdg,layout)
     gw.mainloop()
+    
 
 
 if __name__ == '__main__':

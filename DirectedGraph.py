@@ -79,10 +79,7 @@ class DirectedGraph(Graph):
         return s
 
     def out_edges(self, v):
-        s = set()
-        for w in self[v]:
-            s.update(self[v][w])
-        return s
+        return self[v].values()
 
     def out_degree(self,v):
         """takes a vertex and returns the number of 

@@ -110,11 +110,15 @@ def test_p(n, p, num):
 
 
 def main(script, n=26, p=0.1, num=1, *args):
-    n = int(n)
-    p = float(p)
-    num = int(num)
-    count = test_p(n, p, num)
-    print count
+    #~ n = int(n)
+    #~ p = float(p)
+    #~ num = int(num)
+    #~ count = test_p(n, p, num)
+    #~ print count
+    vs = [Vertex(str(x)) for x in range(100)]
+    rdg = DirectedRandomGraph(vs)
+    rdg.add_random_edges(p=.2)
+    show_graph(rdg)
 
 
 if __name__ == '__main__':
