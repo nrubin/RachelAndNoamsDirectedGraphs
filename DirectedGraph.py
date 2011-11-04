@@ -1,5 +1,6 @@
 from Graph import Graph, Vertex, Edge
-#import GraphWorld
+import random
+import GraphWorld
 
 class DirectedVertex(Vertex):
     pass
@@ -31,7 +32,7 @@ class DirectedGraph(Graph):
         """
         v, w = e
         if v == w:
-			raise LoopError('An Edge cannot exist from a vertex to itself.')
+            raise LoopError('An Edge cannot exist from a vertex to itself.')
         self[v][w] = e
         self.inverse_graph[w][v] = e
         
@@ -154,10 +155,10 @@ class DirectedGraph(Graph):
         for w in neighbors:
             for u in neighbors:
                 try:
-					self[w][u]
-					es += 1.0
+                    self[w][u]
+                    es += 1.0
                 except KeyError:
-					pass
+                    pass
 
         k = len(self[v]) + len(self.inverse_graph[v])
         try: 
@@ -171,12 +172,26 @@ class DirectedGraph(Graph):
         c = sum(local_cs) / len(local_cs)
 
         return c
+
+class DirectedRandomGraph(DirectedGraph):
+    def add_random_edges(self, p=0.05):
+        """Starting with an edgeless graph, add edges to
+        form a random graph where (p) is the probability 
+        that there is an edge between any pair of vertices.
+        """
+        vs = self.vertices()
+        for i, v in enumerate(vs):
+            for j, w in enumerate(vs):
+                if v == w: continue
+                if random.random() > p: continue
+                self.add_edge(Edge(v, w))
+    
         
 class LoopError(Exception):
-	
+    
     def __init__(self, value):
-		self.parameter = value
-		
+        self.parameter = value
+        
     def __str__(self):
         return repr(self.parameter)
  
@@ -203,6 +218,6 @@ if __name__ == '__main__':
     e3 = DirectedEdge(x, v)
     dg = DirectedGraph([v, w, x],[e, e2, e3])
     print dg.clustering_coefficient()
-    #show_graph(dg)
+    show_graph(dg)
     
     

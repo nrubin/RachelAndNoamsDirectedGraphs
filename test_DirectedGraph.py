@@ -1,5 +1,5 @@
 import unittest
-from DirectedGraph import DirectedGraph, DirectedEdge, Vertex
+from DirectedGraph import DirectedGraph, DirectedEdge, Vertex, DirectedRandomGraph
 
 class TestDirectedGraph(unittest.TestCase):
     
@@ -117,6 +117,16 @@ class TestDirectedGraph(unittest.TestCase):
         e3 = DirectedEdge(x, v)
         dg = DirectedGraph([v, w, x],[e, e2, e3])
         self.assertAlmostEqual(dg.clustering_coefficient(),0.5)
+        
+class TestDirectedRandomGraph(unittest.TestCase):
+
+    def test_random_directed_graph(self):
+        vs = [Vertex(str(x)) for x in range(100)]
+        rdg = DirectedRandomGraph(vs)
+        rdg.add_random_edges(p=.2)
+        self.assertFalse(rdg.is_complete())
+    
+    
 
 if __name__== "__main__":
     unittest.main()
