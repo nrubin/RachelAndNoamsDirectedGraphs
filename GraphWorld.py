@@ -228,10 +228,10 @@ def main(script, n='10', *args):
     gw = GraphWorld(directed=True)
     #~ gw.show_graph(g, layout)
     #~ gw.mainloop()
-    vs = [Vertex(str(x)) for x in range(100)]
+    vs = [Vertex(str(x)) for x in range(10)]
     rdg = DirectedRandomGraph(vs)
     rdg.add_random_edges(p=.2)
-    layout = CircleLayout(rdg)
+    layout = RandomLayout(rdg)
     gw.show_graph(rdg,layout)
     gw.mainloop()
     
