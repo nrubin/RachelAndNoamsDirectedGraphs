@@ -20,9 +20,6 @@ from Graph import Vertex
 from Graph import Edge
 from Graph import Graph
 
-from DirectedGraph import *
-
-
 
 class GraphCanvas(GuiCanvas):
     """a GraphCanvas is a canvas that knows how to draw Vertices
@@ -49,38 +46,16 @@ class GraphCanvas(GuiCanvas):
         tag = self.line([v.pos, w.pos])
         return tag
 
-class DirectedGraphCanvas(GraphCanvas):
-    def draw_edge(self, e):
-        """Draw a directed edge as a line with an arrow"""
-        v, w = e
-        vx, vy = v.pos
-        wx, wy = w.pos
-        #~ r = 0.45
-        #~ d = (wx-vx,wy-vy)
-        #~ vshift = (vx + r*d[0], vy + r*d[1])
-        #~ wshift = (wx + r*d[0], vy + r*d[1])
-        y = math.fabs(vy) + math.fabs(wy)
-        x = math.fabs(vx) + math.fabs(wx)
-        theta = math.atan2(y, x)
-        #~ if vx >= 0 and vy >= 0:
-            #~ vshift = 
-        
-        wshift = (wx - .45 * math.cos(theta), wy - .45 * math.sin(theta))
-        vshift = (vx - .45 * math.cos(theta), vy - .45 * math.sin(theta))
-
-        tag = self.line([vshift, wshift], arrow="last", arrowshape="20 20 8")
-        return tag
 
 class GraphWorld(Gui):
     """GraphWorld is a Gui that has a Graph Canvas and control buttons."""
     
-    def __init__(self, directed=False):
+    def __init__(self):
         Gui.__init__(self)
         self.title('GraphWorld')
-        self.setup(directed)
- 
+        self.setup()
 
-    def setup(self, directed):
+    def setup(self):
         """Create the widgets."""
         self.ca_width = 400
         self.ca_height = 400
@@ -89,11 +64,7 @@ class GraphWorld(Gui):
 
         # canvas
         self.col()
-        if directed:
-            c = DirectedGraphCanvas
-        else:
-            c = GraphCanvas
-        self.canvas = self.widget(c, scale=[xscale, yscale],
+        self.canvas = self.widget(GraphCanvas, scale=[xscale, yscale],
                               width=self.ca_width, height=self.ca_height,
                               bg='white')
         
@@ -118,7 +89,6 @@ class GraphWorld(Gui):
         self.etags = {}
         for v in g:
             self.etags[v] = [c.draw_edge(e) for e in g.out_edges(v)]
-
 
         # draw the vertices and store their tags in a list
         self.vtags = [c.draw_vertex(v) for v in g]
@@ -215,26 +185,20 @@ class RandomLayout(Layout):
 
 def main(script, n='10', *args):
 
-    #~ # create n Vertices
-    #~ n = int(n)
-    #~ labels = string.ascii_lowercase + string.ascii_uppercase
-    #~ vs = [Vertex(c) for c in labels[:n]]
-#~ 
-    #~ # create a graph and a layout
-    #~ g = Graph(vs)
-    #~ g.add_all_edges()
-#~ 
-    #~ # draw the graph
-    gw = GraphWorld(directed=True)
-    #~ gw.show_graph(g, layout)
-    #~ gw.mainloop()
-    vs = [Vertex(str(x)) for x in range(10)]
-    rdg = DirectedRandomGraph(vs)
-    rdg.add_random_edges(p=.2)
-    layout = RandomLayout(rdg)
-    gw.show_graph(rdg,layout)
+    # create n Vertices
+    n = int(n)
+    labels = string.ascii_lowercase + string.ascii_uppercase
+    vs = [Vertex(c) for c in labels[:n]]
+
+    # create a graph and a layout
+    g = Graph(vs)
+    g.add_all_edges()
+    layout = CircleLayout(g)
+
+    # draw the graph
+    gw = GraphWorld()
+    gw.show_graph(g, layout)
     gw.mainloop()
-    
 
 
 if __name__ == '__main__':

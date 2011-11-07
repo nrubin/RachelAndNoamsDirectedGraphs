@@ -1,6 +1,6 @@
 from Graph import Graph, Vertex, Edge
 import random
-import GraphWorld
+from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
 
 class DirectedVertex(Vertex):
     pass
@@ -182,7 +182,6 @@ class DirectedRandomGraph(DirectedGraph):
                 if v == w: continue
                 if random.random() > p: continue
                 self.add_edge(Edge(v, w))
-    
         
 class LoopError(Exception):
     
