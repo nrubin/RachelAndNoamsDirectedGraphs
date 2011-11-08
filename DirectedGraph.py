@@ -1,6 +1,7 @@
 from Graph import Graph, Vertex, Edge
 import random
 from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
+#~ from DirectedGraphWorld import DirectedGraphWorld
 
 class DirectedVertex(Vertex):
     pass
@@ -161,7 +162,10 @@ class DirectedGraph(Graph):
         try: 
             c = es / (k * (k-1))
         except ZeroDivisionError:
-            c = es / (k * 1)
+            try:
+                c = es / (k * 1)
+            except ZeroDivisionError:
+                c = 0
         return c
 
     def clustering_coefficient(self):
@@ -200,20 +204,45 @@ def show_graph(g):
             v.color = 'red'"""
         v.color='red'
 
-    layout = GraphWorld.CircleLayout(g)
-    gw = GraphWorld.GraphWorld(directed=True)
+    layout = CircleLayout(g)
+    gw = DirectedGraphWorld()
     gw.show_graph(g, layout)
     gw.mainloop()
+    
+def SmallWorldTest():
+    """
+    Creates an Erdos-Renyi graph of 1000 vertices and iterates through
+    p, checking the clustering coefficient each time. Uses pylot to
+    graph all that stuff, to see if there's anything interesting
+    """
+    import matplotlib.pyplot as pyplot
+    vs = [Vertex(str(v)) for v in range(1000)]
+    cs = []
+    ps = []
+    p = 0.01
+    for i in range(100):
+        drg = DirectedRandomGraph(vs)
+        drg.add_random_edges(p)
+        ps.append(p)
+        cs.append(drg.clustering_coefficient())
+        p += 0.01
+    pyplot.plot(ps,cs)
+    pyplot.xlabel('p')
+    pyplot.ylabel('clustering coefficient')
+    pyplot.show()
+        
+    
         
 if __name__ == '__main__':
-    v = Vertex('v')
-    w = Vertex('w')
-    x = Vertex('x')
-    e = DirectedEdge(v,w)
-    e2 = DirectedEdge(x, w)
-    e3 = DirectedEdge(x, v)
-    dg = DirectedGraph([v, w, x],[e, e2, e3])
-    print dg.clustering_coefficient()
-    show_graph(dg)
+    #~ v = Vertex('v')
+    #~ w = Vertex('w')
+    #~ x = Vertex('x')
+    #~ e = DirectedEdge(v,w)
+    #~ e2 = DirectedEdge(x, w)
+    #~ e3 = DirectedEdge(x, v)
+    #~ dg = DirectedGraph([v, w, x],[e, e2, e3])
+    #~ print dg.clustering_coefficient()
+    SmallWorldTest()
+    #~ show_graph(dg)
     
     
