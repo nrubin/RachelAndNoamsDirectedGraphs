@@ -30,7 +30,7 @@ class DirectedGraphCanvas(GraphCanvas):
 
 class DirectedGraphWorld(GraphWorld):
     
-    #~ def __init__(self):
+    #~ def __init__(self):  
         #~ GraphWorld.__init__(self)
         #~ self.setup()
 

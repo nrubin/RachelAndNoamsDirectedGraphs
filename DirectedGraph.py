@@ -216,11 +216,12 @@ def SmallWorldTest():
     graph all that stuff, to see if there's anything interesting
     """
     import matplotlib.pyplot as pyplot
-    vs = [Vertex(str(v)) for v in range(1000)]
+    vs = [Vertex(str(v)) for v in range(100)]
     cs = []
     ps = []
     p = 0.01
     for i in range(100):
+        print p
         drg = DirectedRandomGraph(vs)
         drg.add_random_edges(p)
         ps.append(p)
