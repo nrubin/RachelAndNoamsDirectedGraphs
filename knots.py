@@ -20,11 +20,11 @@ def bfs(s):
         if v in visited: continue
 
         # mark it visited, then invoke visit
-        visited.add(v)
+        if v != s: visited.add(v)
 
         # add its out vertices to the queue
         queue.extend(dg.out_vertices(v))
-    return visited
+    return frozenset(visited)
 
 def get_reachables(dg):
     """
@@ -33,25 +33,31 @@ def get_reachables(dg):
     reachable = {}
     for v in dg.vertices():
         reachable[v] = bfs(v)
-    #~ print reachable
+
     return reachable
 
 def same_reachables(v, reachables):
     """
     blah
     """
+    t = reachables.get(v, None)
+    print t
+    if len(t) == 0:
+        return False
+        
     for w in reachables[v]:
-        if len(reachables[w]) > 1:
-            inter = reachables[w].intersection(reachables[v])
-            print inter
-            if inter != reachables[v] or inter != reachables[w]:
-                if inter != set():
-                    return False
-    #print reachables
+            s = reachables.get(w, None)
+            if len(s) == 0:
+                return False
+            x = s.symmetric_difference(t)
+            if x != set([v, w]):
+                return False
+    print 'returning true'
     return True
 
 def has_knot(dg):
     reachables = get_reachables(dg)
+    
     for v in dg.vertices():
         print v
         if same_reachables(v, reachables):
@@ -65,7 +71,7 @@ if __name__ == '__main__':
     e1 = DirectedEdge(v,w)
     e2 = DirectedEdge(w,x)
     e3 = DirectedEdge(x,v)
-    dg = DirectedGraph([v,w,x],[e1])
+    dg = DirectedGraph([v,w,x],[e1, e2, e3])
     print has_knot(dg)
     
         
