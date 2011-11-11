@@ -1,4 +1,5 @@
 Create exercise for case study: have reader implement is_symmetric (see en.wikipedia.org/wiki/Directed_graph)
+<<<<<<< HEAD
 
 Interesting Algorithm Design: Formal Knotting Algorithm, Noam's knotting algorithm. Compare.
 
@@ -9,3 +10,5 @@ Algorithm Design: Knots
 Module: NetworkX
 Philosophy: Nahhhhhh
 
+=======
+>>>>>>> 9e832f18e08388b51bfc985b600e5060fa7d6478
