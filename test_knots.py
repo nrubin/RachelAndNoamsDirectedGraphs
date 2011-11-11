@@ -53,8 +53,7 @@ class TestKnots(unittest.TestCase):
         k = Knots(ngon)
         self.assertTrue(k.has_knot())
         
-        
-        
+     
         
         
         
