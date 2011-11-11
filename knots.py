@@ -2,14 +2,13 @@ from DirectedGraph import DirectedGraph, DirectedVertex, DirectedEdge
 
 class Knots():
     def __init__(self, dg):
-        self.cache = {}
+        self._knot_cache = {}
         self.dg = dg
 
-        
-    def bfs(self, s):
+    def _bfsknots(self, s):
         """
-        Breadth first search. Modified. Returns the set of vertices that
-        are accessible by some path from s.
+        Modified breadth-first search. Used to find knots.Returns the 
+        set of vertices that are accessible by some path from s.
 
         s: start vertex
         """
@@ -32,33 +31,35 @@ class Knots():
             for x in self.dg.out_vertices(v):
                 
                 #if its out vertices have been cached, update visited
-                if x in self.cache.keys():
-                    visited.update(self.cache[x])
+                if x in self._knot_cache.keys():
+                    visited.update(self._knot_cache[x])
                     visited.add(x)
                     
                 #otherwise add its out vertices to the queue
-                elif x not in self.cache.keys():
+                elif x not in self._knot_cache.keys():
                     queue.append(x)
                     
-        self.cache[s] = visited
+        self._knot_cache[s] = visited
+        
+        #ensures that s was not added to visited b/c of being in a cache
+        if s in visited: self._knot_cache[s].remove(s)
         return visited
 
-    def get_reachables(self):
+    def _knot_at_v(self, v):
         """
-        Find all the vertices that are reachable from each vertex v.
+        Given a vertex v, finds whether each of its out vertices
+        are all accessible from each other, and not accessible from
+        any other vertex.
+        
+        Returns True if this is case; indicates v is entrance to knot.
         """
-        for v in self.dg.vertices():
-            self.cache[v] = self.bfs(v)
-
-
-    def same_reachables(self, v):
-        t = self.cache.get(v, None)
+        t = self._knot_cache.get(v, None)
 
         if len(t) == 0:
             return False
             
-        for w in self.cache[v]:
-                s = self.cache.get(w, None)
+        for w in self._knot_cache[v]:
+                s = self._knot_cache.get(w, None)
                 if len(s) == 0:
                     return False
                 x = s.symmetric_difference(t)
@@ -68,21 +69,19 @@ class Knots():
         return True
 
     def has_knot(self):
-        self.get_reachables()
-        for k, v in self.cache.items(): print k, v
+        """
+        Returns true if directed graph has a knot.
+        """
+        #build the cache of which vertices are accessible from which
         for v in self.dg.vertices():
-            if self.same_reachables(v):
+            self._knot_cache[v] = self._bfsknots(v)
+
+        #searches for knot
+        for v in self.dg.vertices():
+            if self._knot_at_v(v):
                 return True
         return False
         
-"""if __name__ == '__main__':
-    v = DirectedVertex('v')
-    w = DirectedVertex('w');
-    x = DirectedVertex('x');
-    e1 = DirectedEdge(v,w)
-    e2 = DirectedEdge(w,x)
-    e3 = DirectedEdge(x,v)
-    dg = DirectedGraph([v,w,x],[e1, e2, e3])
-    print has_knot(dg)"""
+
     
-        
+
