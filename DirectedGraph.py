@@ -4,42 +4,68 @@ from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
 #~ from DirectedGraphWorld import DirectedGraphWorld
 
 class DirectedVertex(Vertex):
+    """
+    Represents a Directed Vertex in a graph.
+    Is identical to a regular vertex.
+    """
     pass
 
 class DirectedEdge(Edge):
+    """
+    Represents a Directed Edge FROM Directed Vertex v TO Directed Vertex w.
+    """
     def __repr__(self):
-        """Return a string representation of the edge thisedge that can be
-        evaluated as a Python expression."""
+        """Return a string representation of the edge this directed
+        edge that can be evaluated as a Python expression."""
         return 'Edge(%s to %s)' %(repr(self[0]), repr(self[1]))
 
 class DirectedGraph(Graph):
 
     def __init__(self,vs=[],es=[]):
-        """Creates a new directed graph."""
-        self.inverse_graph = {} #maps in_edges. (key=vertex, val=dictionary of incoming vertices
+        """
+        Creates a new directed graph.
+        @Args:
+            vs, a list of DirectedVertices 
+            es, a list of DirectedEdges
+        @Returns:
+            None
+        """
+        self.reverse_graph = {} #keeps a map of in-vertices
         for v in vs:
             self.add_vertex(v)
         for e in es:
             self.add_edge(e)
  
     def add_vertex(self, v):
+        """
+        Adds a vertex to both the DirectedGraph and its internal complement
+        dictionary, and initiates its value as an empty dictionary.
+        @Args:
+            A DirectedVertex v
+        @Returns:
+            None
+        """
         self[v] = {}
-        self.inverse_graph[v] = {}
+        self.reverse_graph[v] = {}
     
     def add_edge(self, e):
         """
-        Creates an edge FROM V TO W (in V's first dictionary).
-        Adds same edge TO W FROM V (in W's second dicionary).
+        Creates an edge FROM v TO w (As a value of v in the internal dictionary).
+        Adds same edge TO w FROM v (As a value of w in the reverse dictionary).
+        @Args:
+            A DirectedEdge e
+        @Returns: 
+            None
         """
         v, w = e
         if v == w:
             raise LoopError('An Edge cannot exist from a vertex to itself.')
         self[v][w] = e
-        self.inverse_graph[w][v] = e
+        self.reverse_graph[w][v] = e
         
     def get_out_edge(self, v, w):
         """
-        Tries to return the directed edge FROM V TO W. If no edge exists,
+        Tries to return the directed edge FROM v TO w. If no edge exists,
         returns None.
         """
         try:
@@ -51,20 +77,20 @@ class DirectedGraph(Graph):
     
     def get_in_edge(self, v, w):
         """
-        Tries to return the directed edge TO V FROM W. Returns None if no such
+        Tries to return the directed edge TO w FROM w. Returns None if no such
         edge exists.
         """
         try:
-            return self.inverse_graph[v][w]
+            return self.reverse_graph[v][w]
         except KeyError:
             return None
     
     has_in_edge = get_out_edge
 
     def remove_edge(self, v, w):
-        """Deletes the directed edge FROM V TO W."""
+        """Deletes the directed edge FROM v TO w."""
         del self[v][w]
-        del self.inverse_graph[w][v]
+        del self.reverse_graph[w][v]
 
     def edges(self):
         """returns a set of all out-edges of the graph"""
@@ -74,12 +100,16 @@ class DirectedGraph(Graph):
         return s
     
     def in_edges(self, v):
+        """returns a set of all in-edges of the graph"""
         s = set()
-        for w in self.inverse_graph[v]:
-            s.update(self.inverse_graph[v][w])
+        for w in self.reverse_graph[v]:
+            s.update(self.reverse_graph[v][w])
         return s
 
     def out_edges(self, v):
+        """
+        returns the edges leaving v
+        """
         return self[v].values()
 
     def out_degree(self,v):
@@ -94,7 +124,7 @@ class DirectedGraph(Graph):
         """takes a vertex and returns the number
         of edges going into it (the in-degree)"""
         try:
-            return len(self.inverse_graph[v])
+            return len(self.reverse_graph[v])
         except KeyError:
             return None
 
@@ -146,9 +176,14 @@ class DirectedGraph(Graph):
         return True
         
     def cluster(self, v):
+        """
+        Helper function for self.clustering_coefficient.
+        Calculates the clustering coefficient around a vertex v,
+        and returns it.
+        """
         es = 0.0
         neighbors = self[v].keys()
-        neighbors.extend(self.inverse_graph[v].keys())
+        neighbors.extend(self.reverse_graph[v].keys())
 
         for w in neighbors:
             for u in neighbors:
@@ -158,7 +193,7 @@ class DirectedGraph(Graph):
                 except KeyError:
                     pass
 
-        k = len(self[v]) + len(self.inverse_graph[v])
+        k = len(self[v]) + len(self.reverse_graph[v])
         try: 
             c = es / (k * (k-1))
         except ZeroDivisionError:
@@ -169,6 +204,8 @@ class DirectedGraph(Graph):
         return c
 
     def clustering_coefficient(self):
+        """Calculates the clustering coefficient for a graph,
+        and returns it."""
         local_cs = [self.cluster(v) for v in self.keys()]
         c = sum(local_cs) / len(local_cs)
 
@@ -188,6 +225,9 @@ class DirectedRandomGraph(DirectedGraph):
                 self.add_edge(Edge(v, w))
         
 class LoopError(Exception):
+    """
+    Vertices cannot have DirectedEdges leading to themselves. So we throw an error.
+    """
     
     def __init__(self, value):
         self.parameter = value
@@ -197,6 +237,10 @@ class LoopError(Exception):
  
         
 def show_graph(g):
+    """
+    Uses DirectedGraphWorld to show a DirectedGraph using Allen Downey's
+    GraphWorld.
+    """
     for v in g.vertices():
         """if v.visited: 
             v.color = 'white'
