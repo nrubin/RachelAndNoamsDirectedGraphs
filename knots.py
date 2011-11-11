@@ -1,70 +1,81 @@
 from DirectedGraph import DirectedGraph, DirectedVertex, DirectedEdge
 
-def bfs(s):
-    """
-    Breadth first search. Modified. Returns the set of vertices that
-    are accessible by some path from s.
+class Knots():
+    def __init__(self, dg):
+        self.cache = {}
+        self.dg = dg
 
-    s: start vertex
-    """
+        
+    def bfs(self, s):
+        """
+        Breadth first search. Modified. Returns the set of vertices that
+        are accessible by some path from s.
 
-    # initialize the queue with the start vertex
-    queue = [s]
-    visited = set()
-    while queue:
+        s: start vertex
+        """
 
-        # get the next vertex
-        v = queue.pop(0)
+        # initialize the queue with the start vertex
+        queue = [s]
+        visited = set()
+        while queue:
 
-        # skip it if it's already marked
-        if v in visited: continue
+            # get the next vertex
+            v = queue.pop(0)
 
-        # mark it visited, then invoke visit
-        if v != s: visited.add(v)
+            # skip it if it's already marked
+            if v in visited: continue
 
-        # add its out vertices to the queue
-        queue.extend(dg.out_vertices(v))
-    return frozenset(visited)
+            # mark it visited, then invoke visit
+            if v != s: visited.add(v)
 
-def get_reachables(dg):
-    """
-    Find all the vertices that are reachable from each vertex v.
-    """
-    reachable = {}
-    for v in dg.vertices():
-        reachable[v] = bfs(v)
+            
+            for x in self.dg.out_vertices(v):
+                
+                #if its out vertices have been cached, update visited
+                if x in self.cache.keys():
+                    visited.update(self.cache[x])
+                    visited.add(x)
+                    
+                #otherwise add its out vertices to the queue
+                elif x not in self.cache.keys():
+                    queue.append(x)
+                    
+        self.cache[s] = visited
+        return visited
 
-    return reachable
+    def get_reachables(self):
+        """
+        Find all the vertices that are reachable from each vertex v.
+        """
+        for v in self.dg.vertices():
+            self.cache[v] = self.bfs(v)
 
-def same_reachables(v, reachables):
-    """
-    blah
-    """
-    t = reachables.get(v, None)
-    print t
-    if len(t) == 0:
+
+    def same_reachables(self, v):
+        t = self.cache.get(v, None)
+
+        if len(t) == 0:
+            return False
+            
+        for w in self.cache[v]:
+                s = self.cache.get(w, None)
+                if len(s) == 0:
+                    return False
+                x = s.symmetric_difference(t)
+                if x != set([v, w]):
+                    return False
+
+        return True
+
+    def has_knot(self):
+        self.get_reachables()
+        for k, v in self.cache.items(): print k, v
+        for v in self.dg.vertices():
+            if self.same_reachables(v):
+                return True
         return False
         
-    for w in reachables[v]:
-            s = reachables.get(w, None)
-            if len(s) == 0:
-                return False
-            x = s.symmetric_difference(t)
-            if x != set([v, w]):
-                return False
-    print 'returning true'
-    return True
-
-def has_knot(dg):
-    reachables = get_reachables(dg)
-    
-    for v in dg.vertices():
-        print v
-        if same_reachables(v, reachables):
-            return True
-    return False
-    
-if __name__ == '__main__':
+"""if __name__ == '__main__':
     v = DirectedVertex('v')
     w = DirectedVertex('w');
     x = DirectedVertex('x');
@@ -72,6 +83,6 @@ if __name__ == '__main__':
     e2 = DirectedEdge(w,x)
     e3 = DirectedEdge(x,v)
     dg = DirectedGraph([v,w,x],[e1, e2, e3])
-    print has_knot(dg)
+    print has_knot(dg)"""
     
         
