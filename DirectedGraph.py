@@ -23,7 +23,7 @@ class DirectedGraph(Graph):
 
     def __init__(self,vs=[],es=[]):
         """
-        Creates a new directed graph.
+        Creates a new directed graph. 
         @Args:
             vs, a list of DirectedVertices 
             es, a list of DirectedEdges
@@ -210,7 +210,132 @@ class DirectedGraph(Graph):
         c = sum(local_cs) / len(local_cs)
 
         return c
+        
+    def _bfsknots(self, s):
+        """
+        Modified breadth-first search. Used to find knots.Returns the 
+        set of vertices that are accessible by some path from s.
 
+        s: start vertex
+        """
+
+        # initialize the queue with the start vertex
+        queue = [s]
+        visited = set()
+        while queue:
+
+            # get the next vertex
+            v = queue.pop(0)
+
+            # skip it if it's already marked
+            if v in visited: continue
+
+            # mark it visited, then invoke visit
+            if v != s: visited.add(v)
+
+            
+            for x in self.out_vertices(v):
+                
+                #if its out vertices have been cached, update visited
+                if x in self._knot_cache.keys():
+                    visited.update(self._knot_cache[x])
+                    visited.add(x)
+                    
+                #otherwise add its out vertices to the queue
+                elif x not in self._knot_cache.keys():
+                    queue.append(x)
+                    
+        self._knot_cache[s] = visited
+        
+        #ensures that s was not added to visited b/c of being in a cache
+        if s in visited: self._knot_cache[s].remove(s)
+        return visited
+
+    def _knot_at_v(self, v):
+        """
+        Given a vertex v, finds whether each of its out vertices
+        are all accessible from each other, and not accessible from
+        any other vertex.
+        
+        Returns True if this is case; indicates v is entrance to knot.
+        """
+        t = self._knot_cache.get(v, None)
+
+        if len(t) == 0:
+            return False
+            
+        for w in self._knot_cache[v]:
+                s = self._knot_cache.get(w, None)
+                if len(s) == 0:
+                    return False
+                x = s.symmetric_difference(t)
+                if x != set([v, w]):
+                    return False
+
+        return True
+
+    def has_knot(self):
+        """
+        Returns true if directed graph has a knot.
+        """
+        self._knot_cache = {}
+        #build the cache of which vertices are accessible from which
+        for v in self:
+            self._knot_cache[v] = self._bfsknots(v)
+
+        #searches for knot
+        for v in self:
+            if self._knot_at_v(v):
+                return True
+        return False
+
+    def add_regular_edges(self, k=2):
+        """Make a regular directed graph with degree k if possible;
+        otherwise raises an exception."""
+        vs = self.vertices()
+        if k >= len(vs):
+            raise ValueError, ("cannot build a regular directed graph with " +
+                               "degree >= number of vertices.")
+
+        if (k%  2 == 1):
+            raise ValueError, ("cannot build a regular directed graph with " +
+                               "an odd degree")
+        else:
+            self.add_regular_edges_even(k)
+
+    def add_regular_edges_even(self, k=2):
+        """Make a regular directed graph with degree k.  k must be even"""
+        vs = self.vertices()
+        double = vs * 2
+        
+        for i, v in enumerate(vs):
+            for j in range(1,k/2+1):
+                w = double[i+j]
+                self.add_edge(DirectedEdge(v, w))
+                
+    def rewire(self, p=0.01):
+        """Rewires edges according to the algorithm in Watts and Strogatz.
+        (p) is the probability that each edge is rewired.
+        """
+        # consider the edges in random order (this is slightly different
+        # from Watts and Strogatz
+        es = list(self.edges())
+        random.shuffle(es)
+        vs = self.vertices()
+        
+        for e in es:
+            # if this edge is chosen, remove it...
+            if random.random() > p: continue
+            v, w = e
+            self.remove_edge(v,w)
+
+            # then generate a new edge that connects v to another vertex
+            while True:
+                w = random.choice(vs)
+                if v is not w and not self.has_edge(v, w): break
+
+            self.add_edge(DirectedEdge(v, w))
+    
 class DirectedRandomGraph(DirectedGraph):
     def add_random_edges(self, p=0.05):
         """Starting with an edgeless graph, add edges to
@@ -252,42 +377,15 @@ def show_graph(g):
     gw = DirectedGraphWorld()
     gw.show_graph(g, layout)
     gw.mainloop()
+
     
-def SmallWorldTest():
-    """
-    Creates an Erdos-Renyi graph of 1000 vertices and iterates through
-    p, checking the clustering coefficient each time. Uses pylot to
-    graph all that stuff, to see if there's anything interesting
-    """
-    import matplotlib.pyplot as pyplot
-    vs = [Vertex(str(v)) for v in range(100)]
-    cs = []
-    ps = []
-    p = 0.01
-    for i in range(100):
-        print p
-        drg = DirectedRandomGraph(vs)
-        drg.add_random_edges(p)
-        ps.append(p)
-        cs.append(drg.clustering_coefficient())
-        p += 0.01
-    pyplot.plot(ps,cs)
-    pyplot.xlabel('p')
-    pyplot.ylabel('clustering coefficient')
-    pyplot.show()
+    
         
     
         
 if __name__ == '__main__':
-    #~ v = Vertex('v')
-    #~ w = Vertex('w')
-    #~ x = Vertex('x')
-    #~ e = DirectedEdge(v,w)
-    #~ e2 = DirectedEdge(x, w)
-    #~ e3 = DirectedEdge(x, v)
-    #~ dg = DirectedGraph([v, w, x],[e, e2, e3])
-    #~ print dg.clustering_coefficient()
-    SmallWorldTest()
-    #~ show_graph(dg)
+    pass
+    
+    
     
     
