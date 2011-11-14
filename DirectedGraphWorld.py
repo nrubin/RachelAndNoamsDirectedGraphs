@@ -62,16 +62,23 @@ def main(script, n='10', *args):
     vs = [Vertex(c) for c in labels[:n]]
 
     # create a graph and a layout
-    rdg = DirectedRandomGraph(vs)
-    rdg.add_random_edges(p=.2)
-    layout = CircleLayout(rdg)
+    #~ rdg = DirectedRandomGraph(vs)
+    #~ rdg.add_random_edges(p=.2)
+    #~ print rdg.is_complete()
+    
+    #~ v = Vertex('v')
+    #~ w = Vertex('w')
+    #~ x = Vertex('x')
+    dg = DirectedGraph(vs)
+    dg.add_regular_edges(4)
+    dg.rewire(p=1)
+
+    layout = CircleLayout(dg)
 
     # draw the graph
     gw = DirectedGraphWorld()
-    gw.show_graph(rdg, layout)
+    gw.show_graph(dg, layout)
     gw.mainloop()
-    print rdg.is_complete()
-
 
 if __name__ == '__main__':
     import sys

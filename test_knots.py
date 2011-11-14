@@ -18,16 +18,14 @@ class TestKnots(unittest.TestCase):
     def test_positive(self):
         
         #triangular knot
-        res = Knots(self.dg)
-        self.assertEqual(res.has_knot(), True)
+        self.assertEqual(self.dg.has_knot(), True)
   
         #triangular knot w/ an edge into it
         self.a = DirectedVertex('a')
         self.dg.add_vertex(self.a)
         self.Kanye = DirectedEdge(self.a,self.v)
         self.dg.add_edge(self.Kanye)
-        res2 = Knots(self.dg)
-        self.assertEqual(res2.has_knot(),True)
+        self.assertEqual(self.dg.has_knot(),True)
     
     def test_ngon_with_chord(self):
         v1 = DirectedVertex('v1')
@@ -44,14 +42,12 @@ class TestKnots(unittest.TestCase):
         ngon = DirectedGraph([v1,v2,v3,v4,v5],
             [e1,e2,e3,e4,e5])
         
-        k = Knots(ngon)
-        self.assertFalse(k.has_knot())
+        self.assertFalse(ngon.has_knot())
         
         chord = DirectedEdge(v1,v4)
         ngon.add_edge(chord)
-        
-        k = Knots(ngon)
-        self.assertTrue(k.has_knot())
+
+        self.assertTrue(ngon.has_knot())
         
      
         
