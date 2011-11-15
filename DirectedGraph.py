@@ -1,7 +1,7 @@
 from Graph import Graph, Vertex, Edge
 import random
 from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
-#from DirectedGraphWorld import DirectedGraphWorld
+#~ from DirectedGraphWorld import show_graph
 
 class DirectedVertex(Vertex):
     """
@@ -331,7 +331,7 @@ class DirectedGraph(Graph):
         (p) is the probability that each edge is rewired.
         """
         # consider the edges in random order (this is slightly different
-        # from Watts and Strogatz
+        # from Watts and Strogatz)
         es = list(self.edges())
         random.shuffle(es)
         vs = self.vertices()
@@ -348,9 +348,6 @@ class DirectedGraph(Graph):
                 if v is not w and not self.has_edge(v, w): break
 
             self.add_edge(DirectedEdge(v, w))
-    
-class DirectedRandomGraph(DirectedGraph):
-
         
 class LoopError(Exception):
     """
@@ -365,21 +362,46 @@ class LoopError(Exception):
  
  
 class BA_smallworld(DirectedGraph):
-    def __init__(self, t, mo):      
+    def __init__(self, mo):      
         self.iter_labels = self.labels()
         vs = [DirectedVertex(self.iter_labels.next()) for x in range(mo)]
         
         DirectedGraph.__init__(self, vs, [])
         self.add_random_edges(p=0.5)
-        self.edge_count = self.edges()
-        self.m = mo
-        self.node_histogram = []
+        self.mo = mo
+        self._initialize_histograms()
         
+    def _initialize_histograms(self):
+        self._node_in_histogram = []
+        self._node_out_histogram = []
+        for v in self:
+            #~ import pdb; pdb.set_trace()
+            self._node_in_histogram.extend([v for i in range(self.in_degree(v))])
+            self._node_out_histogram.extend([v for i in range(self.out_degree(v))])
+            
     def single_time_step(self):
-        v = DirectedVertex(self.iter_labels.next())
-        self.add_vertex(v)
+        w = DirectedVertex(self.iter_labels.next())
+        self.add_vertex(w)
+        if self.mo % 2 == 1:
+            m = self.mo - 1
+        else:
+            m = self.mo
+            
+        for v in random.sample(self._node_in_histogram, m/2):
+            self.add_edge(DirectedEdge(w,v))
+            self._node_in_histogram.append(v)
+            
+        for v in random.sample(self._node_out_histogram, m/2):
+            self.add_edge(DirectedEdge(v,w))
+            self._node_in_histogram.append(w)
+            self._node_out_histogram.append(v)
+            
+        self._node_out_histogram.extend([w for i in range(m/2)])
         
-        
+    def build_graph(self,t):
+        for i in range(t):
+            self.single_time_step()        
+            
     def labels(self):
         i = 0
         while True:
@@ -393,7 +415,8 @@ class BA_smallworld(DirectedGraph):
     
         
 if __name__ == '__main__':
-    n, mo = 100, 5
-    bag = BA_smallworld(n, mo)
-    show_graph(bag)
+    n, mo = 6, 5
+    bag = BA_smallworld(mo)
+    bag.build_graph(n)
+    #show_graph(bag)
     

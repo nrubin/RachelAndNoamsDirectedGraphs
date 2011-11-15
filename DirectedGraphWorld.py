@@ -1,8 +1,9 @@
 from Graph import Vertex, Edge, Graph
 from RandomGraph import RandomGraph
-from DirectedGraph import DirectedGraph,DirectedRandomGraph 
+from DirectedGraph import DirectedGraph,BA_smallworld
 import math
 import string
+import random
 from GraphWorld import GraphWorld, GraphCanvas, Layout, CircleLayout,RandomLayout
 
 class DirectedGraphCanvas(GraphCanvas):
@@ -53,33 +54,7 @@ class DirectedGraphWorld(GraphWorld):
         self.bu(text='Clear', command=self.clear)
         self.bu(text='Quit', command=self.quit)
         self.endrow()
-
-def main(script, n='10', *args):
-
-    # create n Vertices
-    n = int(n)
-    labels = string.ascii_lowercase + string.ascii_uppercase
-    vs = [Vertex(c) for c in labels[:n]]
-
-    # create a graph and a layout
-    #~ rdg = DirectedRandomGraph(vs)
-    #~ rdg.add_random_edges(p=.2)
-    #~ print rdg.is_complete()
-    
-    #~ v = Vertex('v')
-    #~ w = Vertex('w')
-    #~ x = Vertex('x')
-    dg = DirectedGraph(vs)
-    dg.add_regular_edges(4)
-    dg.rewire(p=1)
-
-    layout = CircleLayout(dg)
-
-    # draw the graph
-    gw = DirectedGraphWorld()
-    gw.show_graph(dg, layout)
-    gw.mainloop()
-
+        
 def show_graph(g):
     """
     Uses DirectedGraphWorld to show a DirectedGraph using Allen Downey's
@@ -96,6 +71,39 @@ def show_graph(g):
     gw = DirectedGraphWorld()
     gw.show_graph(g, layout)
     gw.mainloop()
+
+def main(script, n='10', *args):
+
+    #~ # create n Vertices
+    #~ n = int(n)
+    #~ labels = string.ascii_lowercase + string.ascii_uppercase
+    #~ vs = [Vertex(c) for c in labels[:n]]
+#~ 
+    #~ # create a graph and a layout
+    #~ rdg = DirectedRandomGraph(vs)
+    #~ rdg.add_random_edges(p=.2)
+    #~ print rdg.is_complete()
+    
+    #~ v = Vertex('v')
+    #~ w = Vertex('w')
+    #~ x = Vertex('x')
+    #~ dg = DirectedGraph(vs)
+    #~ dg.add_regular_edges(4)
+    #~ dg.rewire(p=1)
+#~ 
+    #~ layout = CircleLayout(dg)
+#~ 
+    #~ # draw the graph
+    #~ gw = DirectedGraphWorld()
+    #~ gw.show_graph(dg, layout)
+    #~ gw.mainloop()
+    n, mo = 10, 2
+    bag = BA_smallworld(mo)
+    bag.build_graph(n)
+    show_graph(bag)
+    
+
+
 
 if __name__ == '__main__':
     import sys
