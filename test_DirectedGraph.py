@@ -1,5 +1,6 @@
 import unittest
-from DirectedGraph import DirectedGraph, DirectedEdge, Vertex, DirectedRandomGraph
+from DirectedGraph import DirectedGraph, DirectedEdge, Vertex, DirectedRandomGraph, BA_smallworld
+from DirectedGraphWorld import show_graph
 
 class TestDirectedGraph(unittest.TestCase):
     
@@ -129,4 +130,7 @@ class TestDirectedRandomGraph(unittest.TestCase):
     
 
 if __name__== "__main__":
-    unittest.main()
+    #unittest.main()
+    n, mo = 100, 5
+    bag = BA_smallworld(n, mo)
+    show_graph(bag)

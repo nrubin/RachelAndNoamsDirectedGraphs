@@ -1,7 +1,7 @@
 from Graph import Graph, Vertex, Edge
 import random
 from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
-#~ from DirectedGraphWorld import DirectedGraphWorld
+#from DirectedGraphWorld import DirectedGraphWorld
 
 class DirectedVertex(Vertex):
     """
@@ -62,7 +62,20 @@ class DirectedGraph(Graph):
             raise LoopError('An Edge cannot exist from a vertex to itself.')
         self[v][w] = e
         self.reverse_graph[w][v] = e
-        
+
+
+    def add_random_edges(self, p=0.05):
+        """Starting with an edgeless graph, add edges to
+        form a random graph where (p) is the probability 
+        that there is an edge between any pair of vertices.
+        Erdos-Renyi model
+        """
+        vs = self.vertices()
+        for i, v in enumerate(vs):
+            for j, w in enumerate(vs):
+                if v == w: continue
+                if random.random() > p: continue
+                self.add_edge(Edge(v, w))        
     def get_out_edge(self, v, w):
         """
         Tries to return the directed edge FROM v TO w. If no edge exists,
@@ -337,17 +350,7 @@ class DirectedGraph(Graph):
             self.add_edge(DirectedEdge(v, w))
     
 class DirectedRandomGraph(DirectedGraph):
-    def add_random_edges(self, p=0.05):
-        """Starting with an edgeless graph, add edges to
-        form a random graph where (p) is the probability 
-        that there is an edge between any pair of vertices.
-        """
-        vs = self.vertices()
-        for i, v in enumerate(vs):
-            for j, w in enumerate(vs):
-                if v == w: continue
-                if random.random() > p: continue
-                self.add_edge(Edge(v, w))
+
         
 class LoopError(Exception):
     """
@@ -360,23 +363,29 @@ class LoopError(Exception):
     def __str__(self):
         return repr(self.parameter)
  
+ 
+class BA_smallworld(DirectedGraph):
+    def __init__(self, t, mo):      
+        self.iter_labels = self.labels()
+        vs = [DirectedVertex(self.iter_labels.next()) for x in range(mo)]
         
-def show_graph(g):
-    """
-    Uses DirectedGraphWorld to show a DirectedGraph using Allen Downey's
-    GraphWorld.
-    """
-    for v in g.vertices():
-        """if v.visited: 
-            v.color = 'white'
-        else:
-            v.color = 'red'"""
-        v.color='red'
+        DirectedGraph.__init__(self, vs, [])
+        self.add_random_edges(p=0.5)
+        self.edge_count = self.edges()
+        self.m = mo
+        self.node_histogram = []
+        
+    def single_time_step(self):
+        v = DirectedVertex(self.iter_labels.next())
+        self.add_vertex(v)
+        
+        
+    def labels(self):
+        i = 0
+        while True:
+            yield str(i)
+            i += 1
 
-    layout = CircleLayout(g)
-    gw = DirectedGraphWorld()
-    gw.show_graph(g, layout)
-    gw.mainloop()
 
     
     
@@ -384,8 +393,7 @@ def show_graph(g):
     
         
 if __name__ == '__main__':
-    pass
-    
-    
-    
+    n, mo = 100, 5
+    bag = BA_smallworld(n, mo)
+    show_graph(bag)
     

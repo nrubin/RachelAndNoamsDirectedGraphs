@@ -80,6 +80,23 @@ def main(script, n='10', *args):
     gw.show_graph(dg, layout)
     gw.mainloop()
 
+def show_graph(g):
+    """
+    Uses DirectedGraphWorld to show a DirectedGraph using Allen Downey's
+    GraphWorld.
+    """
+    for v in g.vertices():
+        """if v.visited: 
+            v.color = 'white'
+        else:
+            v.color = 'red'"""
+        v.color='red'
+
+    layout = CircleLayout(g)
+    gw = DirectedGraphWorld()
+    gw.show_graph(g, layout)
+    gw.mainloop()
+
 if __name__ == '__main__':
     import sys
     main(*sys.argv)
