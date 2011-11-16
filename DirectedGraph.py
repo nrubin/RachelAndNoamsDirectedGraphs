@@ -1,14 +1,7 @@
 from Graph import Graph, Vertex, Edge
 import random
 from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
-#~ from DirectedGraphWorld import show_graph
-
-class DirectedVertex(Vertex):
-    """
-    Represents a Directed Vertex in a graph.
-    Is identical to a regular vertex.
-    """
-    pass
+import DirectedGraphWorld
 
 class DirectedEdge(Edge):
     """
@@ -41,7 +34,7 @@ class DirectedGraph(Graph):
         Adds a vertex to both the DirectedGraph and its internal complement
         dictionary, and initiates its value as an empty dictionary.
         @Args:
-            A DirectedVertex v
+            A Vertex v
         @Returns:
             None
         """
@@ -62,20 +55,7 @@ class DirectedGraph(Graph):
             raise LoopError('An Edge cannot exist from a vertex to itself.')
         self[v][w] = e
         self.reverse_graph[w][v] = e
-
-
-    def add_random_edges(self, p=0.05):
-        """Starting with an edgeless graph, add edges to
-        form a random graph where (p) is the probability 
-        that there is an edge between any pair of vertices.
-        Erdos-Renyi model
-        """
-        vs = self.vertices()
-        for i, v in enumerate(vs):
-            for j, w in enumerate(vs):
-                if v == w: continue
-                if random.random() > p: continue
-                self.add_edge(Edge(v, w))        
+      
     def get_out_edge(self, v, w):
         """
         Tries to return the directed edge FROM v TO w. If no edge exists,
@@ -91,7 +71,7 @@ class DirectedGraph(Graph):
     def get_in_edge(self, v, w):
         """
         Tries to return the directed edge TO w FROM w. Returns None if no such
-        edge exists.
+        edge exists. Vim is cool.
         """
         try:
             return self.reverse_graph[v][w]
@@ -119,6 +99,14 @@ class DirectedGraph(Graph):
             s.update(self.reverse_graph[v][w])
         return s
 
+    def in_degree(self,v):
+        """takes a vertex and returns the number
+    of edges going into it (the in-degree)"""
+        try:
+            return len(self.reverse_graph[v])
+        except KeyError:
+            return None
+
     def out_edges(self, v):
         """
         returns the edges leaving v
@@ -133,20 +121,9 @@ class DirectedGraph(Graph):
         except KeyError:
             return None
     
-    def in_degree(self,v):
-        """takes a vertex and returns the number
-        of edges going into it (the in-degree)"""
-        try:
-            return len(self.reverse_graph[v])
-        except KeyError:
-            return None
-
-
-
     def is_strongly_connected(self):
-        """iterates through every vertex in the graph, checking
-        connectedness. If the graph is connected through every vertex,
-        the the  directed graph is strongly connected."""
+        """If the graph is strongly connected, returns True.
+        Else, returns False."""
         def visit(v):
             self.visited_count += 1
 
@@ -188,9 +165,9 @@ class DirectedGraph(Graph):
                 return False
         return True
         
-    def cluster(self, v):
+    def _cluster(self, v):
         """
-        Helper function for self.clustering_coefficient.
+        Helper function for DirectedGraph.clustering_coefficient.
         Calculates the clustering coefficient around a vertex v,
         and returns it.
         """
@@ -219,7 +196,7 @@ class DirectedGraph(Graph):
     def clustering_coefficient(self):
         """Calculates the clustering coefficient for a graph,
         and returns it."""
-        local_cs = [self.cluster(v) for v in self.keys()]
+        local_cs = [self._cluster(v) for v in self.keys()]
         c = sum(local_cs) / len(local_cs)
 
         return c
@@ -314,10 +291,12 @@ class DirectedGraph(Graph):
             raise ValueError, ("cannot build a regular directed graph with " +
                                "an odd degree")
         else:
-            self.add_regular_edges_even(k)
+            self._add_regular_edges_even(k)
 
-    def add_regular_edges_even(self, k=2):
-        """Make a regular directed graph with degree k.  k must be even"""
+    def _add_regular_edges_even(self, k=2):
+        """
+        Make a regular directed graph with degree k.  k must be even.
+        """
         vs = self.vertices()
         double = vs * 2
         
@@ -326,6 +305,19 @@ class DirectedGraph(Graph):
                 w = double[i+j]
                 self.add_edge(DirectedEdge(v, w))
                 
+    def add_random_edges(self, p=0.05):
+        """Starting with an edgeless graph, add edges to
+        form a random graph where (p) is the probability 
+        that there is an edge between any pair of vertices.
+        Follows the Erdos-Renyi model of a random graph.
+        """
+        vs = self.vertices()
+        for i, v in enumerate(vs):
+            for j, w in enumerate(vs):
+                if v == w: continue
+                if random.random() > p: continue
+                self.add_edge(DirectedEdge(v, w))  
+    
     def rewire(self, p=0.01):
         """Rewires edges according to the algorithm in Watts and Strogatz.
         (p) is the probability that each edge is rewired.
@@ -349,22 +341,23 @@ class DirectedGraph(Graph):
 
             self.add_edge(DirectedEdge(v, w))
         
-class LoopError(Exception):
+class SmallWorldDirectedGraph(DirectedGraph):
     """
-    Vertices cannot have DirectedEdges leading to themselves. So we throw an error.
+    Represents a Small World Directed Graph, using the Barabasi-Albert
+    algorithm to generate a small world graph.
     """
-    
-    def __init__(self, value):
-        self.parameter = value
-        
-    def __str__(self):
-        return repr(self.parameter)
- 
- 
-class BA_smallworld(DirectedGraph):
     def __init__(self, mo):      
-        self.iter_labels = self.labels()
-        vs = [DirectedVertex(self.iter_labels.next()) for x in range(mo)]
+        """
+        @Args:
+            mo, the initial number of vertices in the graph
+        @Returns:
+            None
+        
+        Creates a small world graph. Initializes the graph as a
+        truly random Erdos-Renyi graph with a p of 0.5.
+        """
+        self.iter_labels = self._labels()
+        vs = [Vertex(self.iter_labels.next()) for x in range(mo)]
         
         DirectedGraph.__init__(self, vs, [])
         self.add_random_edges(p=0.5)
@@ -372,21 +365,45 @@ class BA_smallworld(DirectedGraph):
         self._initialize_histograms()
         
     def _initialize_histograms(self):
+        """
+        @Args:
+            None
+        @Returns:
+            None
+        Creates two lists: node_in_histogram and node_out_histogram. These lists
+        contain multiple copies of the same vertex, dependent on how many in
+        and out edges that vertex has. 
+        """
         self._node_in_histogram = []
         self._node_out_histogram = []
         for v in self:
-            #~ import pdb; pdb.set_trace()
+            #for every in edge a vertex has, add it to the node_in_histogram
             self._node_in_histogram.extend([v for i in range(self.in_degree(v))])
+            #for eveyr out edge a vertex has, add it to the node_out_histogram
             self._node_out_histogram.extend([v for i in range(self.out_degree(v))])
             
     def single_time_step(self):
-        w = DirectedVertex(self.iter_labels.next())
+        """
+        @Args:
+            None
+        @Returns:
+            None
+        Executes a single time step in a Barabasi-Albert Graph.
+        """
+        w = Vertex(self.iter_labels.next())
         self.add_vertex(w)
+        #We add an equal number of in and out-edges, so we need to check 
+        #if the number of edges we add is even or odd
         if self.mo % 2 == 1:
             m = self.mo - 1
         else:
             m = self.mo
             
+        #Since the histograms contain more instances of vertices that are more
+        #connected, if we randomly sample them, we'll get preferential 
+        #attachment. Adapted from the NetworkX implementation of
+        #Barabasi-Albert graphs.
+        
         for v in random.sample(self._node_in_histogram, m/2):
             self.add_edge(DirectedEdge(w,v))
             self._node_in_histogram.append(v)
@@ -396,27 +413,51 @@ class BA_smallworld(DirectedGraph):
             self._node_in_histogram.append(w)
             self._node_out_histogram.append(v)
             
+        #We've created a bunch of out edges from our new vertex,
+        #so we need to add those edges to our histogram.
         self._node_out_histogram.extend([w for i in range(m/2)])
         
+        
     def build_graph(self,t):
+        """
+        @Args:
+            t, the number of time steps to execute
+        @Returns:
+            None
+        Builds the Barabasi-Albert Graph
+        """
         for i in range(t):
             self.single_time_step()        
             
-    def labels(self):
+    def _labels(self):
+        """
+        Iterator that yields numerical labels for vertices
+        """
         i = 0
         while True:
             yield str(i)
             i += 1
 
+class LoopError(Exception):
+    """
+    Vertices cannot have DirectedEdges leading to themselves. 
+    So we throw an error.
+    """
+    
+    def __init__(self, value):
+        self.parameter = value
+        
+    def __str__(self):
+        return repr(self.parameter)
 
-    
-    
-        
-    
-        
-if __name__ == '__main__':
+def main(script,*args):
     n, mo = 6, 5
-    bag = BA_smallworld(mo)
-    bag.build_graph(n)
-    #show_graph(bag)
+    swdg = SmallWorldDirectedGraph(mo)
+    swdg.build_graph(n)
+    DirectedGraphWorld.show_directed_graph(swdg)
+
+if __name__ == '__main__':
+    import sys
+    main(*sys.argv)
+
     
