@@ -17,19 +17,20 @@ def etime():
 def small_world_knotting():
     mo = 5
     t = 5
-    num_graphs = 100
+    num_graphs = 25
     ts = []
     knots = []
-    for i in range(1000):
+    for i in range(10):
         knot_count = 0
-        for i in range(num_graphs):
+        for j in range(num_graphs):
             swdg = SmallWorldDirectedGraph(mo)
             swdg.build_graph(t)
             if swdg.has_knot():
                 knot_count += 1
+            #~ print knot_count
         knots.append(knot_count/(float(num_graphs)))
         ts.append(t)
-        t += 1
+        t += 100
     pyplot.figure(1)
     pyplot.plot(ts,knots,'o')
     pyplot.xlabel('Time Steps')
@@ -121,5 +122,6 @@ def KnottingRandomness():
     
 
 if __name__ == '__main__':
-    knotting_order_of_growth()
+    small_world_knotting()
+    #~ knotting_order_of_growth()
 
