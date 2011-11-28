@@ -1,6 +1,6 @@
 import unittest
-from DirectedGraph import DirectedGraph, DirectedEdge, Vertex, SmallWorldDirectedGraph
-from DirectedGraphWorld import show_graph
+from DirectedGraph import *
+#~ from DirectedGraphWorld import show_graph
 
 class TestDirectedGraph(unittest.TestCase):
     
@@ -8,35 +8,35 @@ class TestDirectedGraph(unittest.TestCase):
         """Does an edge FROM V to W get added to proper dictionaries?"""
         v = Vertex('v')
         w = Vertex('w')
-        e = DirectedEdge(v, w)
+        e = Arc(v, w)
 
         dg = DirectedGraph([v, w], [e])
         self.assertEqual(dg[v][w], e)
         self.assertEqual(dg[w], {})
         
-        self.assertEqual(dg.inverse_graph[w][v], e)
-        self.assertEqual(dg.inverse_graph[v], {})
+        self.assertEqual(dg.reverse_graph[w][v], e)
+        self.assertEqual(dg.reverse_graph[v], {})
 
     def test_remove_edge(self):
         v = Vertex('v')
         w = Vertex('w')
-        e = DirectedEdge(v, w)
+        e = Arc(v, w)
 
         dg = DirectedGraph([v, w], [e])
 
-        dg.remove_edge(v, w)
+        dg.remove_arc(v, w)
 
         self.assertEqual(dg[v],{})
-        self.assertEqual(dg.inverse_graph[w],{})
+        self.assertEqual(dg.reverse_graph[w],{})
         self.assertEqual(dg[w], {})
-        self.assertEqual(dg.inverse_graph[v], {})
+        self.assertEqual(dg.reverse_graph[v], {})
 
     def test_in_out_degrees(self):
         
         v = Vertex('v')
         w = Vertex('w')
         x = Vertex('x')
-        e = DirectedEdge(v, w)
+        e = Arc(v, w)
 
         dg = DirectedGraph([v, w], [e])
         
@@ -55,8 +55,8 @@ class TestDirectedGraph(unittest.TestCase):
     def test_is_connected(self):
         v = Vertex('v')
         w = Vertex('w')
-        e1 = DirectedEdge(v, w)
-        e2 = DirectedEdge(w,v)
+        e1 = Arc(v, w)
+        e2 = Arc(w,v)
 
         dg = DirectedGraph([v, w], [e1,e2])
         self.assertEqual(dg.is_strongly_connected(),True)
@@ -72,7 +72,7 @@ class TestDirectedGraph(unittest.TestCase):
         
         dg = DirectedGraph([v,w])
         
-        dg.complete()
+        dg.add_all_edges()
         
         self.assertTrue(dg.is_strongly_connected())
         
@@ -82,16 +82,16 @@ class TestDirectedGraph(unittest.TestCase):
         
         dg = DirectedGraph([v,w])
         
-        dg.complete()
+        dg.add_all_edges()
         
         self.assertTrue(dg.is_complete())
     
-    def test_correct_inverse_graph(self):
+    def test_correct_reverse_graph(self):
         """checks that every out-edge in dg also exists as an in-edge
         in dg.inverse_graph"""
         v = Vertex('v')
         w = Vertex('w')
-        e = DirectedEdge(v,w)
+        e = Arc(v,w)
         
         dg = DirectedGraph([v,w],[e])
         
@@ -102,8 +102,8 @@ class TestDirectedGraph(unittest.TestCase):
         for v in dg.keys():
             for key,val in dg[v].items():
                 out_edges.update(val)
-        for w in dg.inverse_graph.keys():
-            for key,val in dg.inverse_graph[w].items():
+        for w in dg.reverse_graph.keys():
+            for key,val in dg.reverse_graph[w].items():
                 in_edges.update(val)
     
         self.assertEqual(out_edges,in_edges)
@@ -113,9 +113,9 @@ class TestDirectedGraph(unittest.TestCase):
         v = Vertex('v')
         w = Vertex('w')
         x = Vertex('x')
-        e = DirectedEdge(v,w)
-        e2 = DirectedEdge(x, w)
-        e3 = DirectedEdge(x, v)
+        e = Arc(v,w)
+        e2 = Arc(x, w)
+        e3 = Arc(x, v)
         dg = DirectedGraph([v, w, x],[e, e2, e3])
         self.assertAlmostEqual(dg.clustering_coefficient(),0.5)
         
@@ -124,14 +124,11 @@ class TestDirectedRandomGraph(unittest.TestCase):
     def test_random_directed_graph(self):
         vs = [Vertex(str(x)) for x in range(100)]
         rdg = DirectedGraph(vs)
-        rdg.add_random_edges(p=.2)
+        rdg.add_random_arcs(p=.2)
         self.assertFalse(rdg.is_complete())
     
     
 
 if __name__== "__main__":
-    #unittest.main()
-    n, mo = 10, 20
-    bag = SmallWorldDirectedGraph(mo)
-    bag.build_graph(n)
-    show_graph(bag)
+    unittest.main()
+   

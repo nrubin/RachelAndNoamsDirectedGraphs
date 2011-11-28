@@ -1,25 +1,39 @@
-from Graph import Graph, Vertex, Edge
+from Graph import Graph, Vertex
 import random
 from GraphWorld import GraphWorld,GraphCanvas,Layout,CircleLayout,RandomLayout
 import DirectedGraphWorld
 
-class DirectedEdge(Edge):
+class Arc(tuple):
     """
-    Represents a Directed Edge FROM Directed Vertex v TO Directed Vertex w.
+    Represents a Directed arc FROM Directed Vertex v TO Directed Vertex w.
     """
+    def __new__(cls, *vs):
+        """The Arc Constructor takes two vertices"""
+        if len(vs) != 2:
+            raise ValueError, 'Arcs must connect exactly two vertices'
+        return tuple.__new__(cls,vs)
+    
     def __repr__(self):
-        """Return a string representation of the edge this directed
-        edge that can be evaluated as a Python expression."""
-        return 'Edge(%s to %s)' %(repr(self[0]), repr(self[1]))
+        """Return a string representation of this arc
+         that can be evaluated as a Python expression."""
+        return 'Arc(%s to %s)' %(repr(self[0]), repr(self[1]))
+    
+    __str__ = __repr__
 
+    
 class DirectedGraph(Graph):
+    """A DirectedGraph contains two dictionaries.
+    The internal dictionary is a dictionary of dictionaries.
+    It maps vertices to their out-arcs. The reverse dictionary
+    maps vertices to their in-arcs.
+    """
 
     def __init__(self,vs=[],es=[]):
         """
         Creates a new directed graph. 
         @Args:
-            vs, a list of DirectedVertices 
-            es, a list of DirectedEdges
+            vs, a list of Vertices 
+            es, a list of Arcs
         @Returns:
             None
         """
@@ -27,7 +41,7 @@ class DirectedGraph(Graph):
         for v in vs:
             self.add_vertex(v)
         for e in es:
-            self.add_edge(e)
+            self.add_arc(e)
  
     def add_vertex(self, v):
         """
@@ -41,24 +55,35 @@ class DirectedGraph(Graph):
         self[v] = {}
         self.reverse_graph[v] = {}
     
-    def add_edge(self, e):
+    def add_arc(self, e):
         """
-        Creates an edge FROM v TO w (As a value of v in the internal dictionary).
-        Adds same edge TO w FROM v (As a value of w in the reverse dictionary).
+        Creates an arc FROM v TO w (As a value of v in the internal dictionary).
+        Adds same arc TO w FROM v (As a value of w in the reverse dictionary).
         @Args:
-            A DirectedEdge e
+            An Arc e
         @Returns: 
             None
         """
         v, w = e
         if v == w:
-            raise LoopError('An Edge cannot exist from a vertex to itself.')
+            raise LoopError('An arc cannot exist from a vertex to itself.')
         self[v][w] = e
         self.reverse_graph[w][v] = e
-      
-    def get_out_edge(self, v, w):
+    
+    add_edge = add_arc
+    """We only want to add arcs, not edges"""
+        
+    def remove_arc(self, v, w):
+        """Deletes the directed arc FROM v TO w."""
+        del self[v][w]
+        del self.reverse_graph[w][v]
+    
+    remove_edge = remove_arc
+    """arcs, not edges."""
+    
+    def get_out_arc(self, v, w):
         """
-        Tries to return the directed edge FROM v TO w. If no edge exists,
+        Tries to return the directed arc FROM v TO w. If no arc exists,
         returns None.
         """
         try:
@@ -66,34 +91,42 @@ class DirectedGraph(Graph):
         except KeyError:
             return None
 
-    has_out_edge = get_out_edge
+    has_out_arc = get_out_arc   
     
-    def get_in_edge(self, v, w):
+    def get_in_arc(self, v, w):
         """
-        Tries to return the directed edge TO w FROM w. Returns None if no such
-        edge exists. Vim is cool.
+        Tries to return the directed arc TO w FROM w. Returns None if no such
+        arc exists. Vim is cool.
         """
         try:
             return self.reverse_graph[v][w]
         except KeyError:
             return None
     
-    has_in_edge = get_out_edge
+    has_in_arc = get_out_arc
+    
+    def has_arc(self,v,w):
+        """If an arc between v and w (in either direction) exists in the graph 
+        or the reverse_graph, returns True.otherwise returns False."""
+        if self.get_in_arc(v,w) or self.get_out_arc(v,w):
+            return True
+        else:
+            return False
 
-    def remove_edge(self, v, w):
-        """Deletes the directed edge FROM v TO w."""
-        del self[v][w]
-        del self.reverse_graph[w][v]
-
-    def edges(self):
-        """returns a set of all out-edges of the graph"""
+    def get_edge(self, v, w):
+        raise NotApplicableToDirectedGraphsError('Please use get_out_arc or get_in_arc to get a handle on arcs in a DirectedGraph')
+    
+    def arcs(self):
+        """returns a set of all out-arcs of the graph"""
         s = set()
         for d in self.itervalues():
             s.update(d.itervalues())
         return s
     
-    def in_edges(self, v):
-        """returns a set of all in-edges of the graph"""
+    edges = arcs
+    
+    def in_arcs(self, v):
+        """returns a set of all in-arcs of the graph"""
         s = set()
         for w in self.reverse_graph[v]:
             s.update(self.reverse_graph[v][w])
@@ -101,26 +134,67 @@ class DirectedGraph(Graph):
 
     def in_degree(self,v):
         """takes a vertex and returns the number
-    of edges going into it (the in-degree)"""
+    of arcs going into it (the in-degree)"""
         try:
             return len(self.reverse_graph[v])
         except KeyError:
             return None
 
-    def out_edges(self, v):
+    def out_arcs(self, v):
         """
-        returns the edges leaving v
+        returns the arcs leaving v
         """
         return self[v].values()
+    
+    out_edges = out_arcs
 
     def out_degree(self,v):
         """takes a vertex and returns the number of 
-        edges leaving it (the out-degree)"""
+        arcs leaving it (the out-degree)"""
         try:
             return len(self[v])
         except KeyError:
             return None
     
+    def add_all_arcs(self):
+        """completes the graph by adding an arc from every vertex
+        to every vertex"""
+        for v in self.vertices():
+            current_vertex = v
+            for w in self.vertices():
+                if current_vertex == w:
+                    continue
+                e = Arc(current_vertex,w)
+                self.add_arc(e)
+                
+    add_all_edges = add_all_arcs
+                
+    def add_regular_arcs(self, k=2):
+        """Make a regular directed graph with degree k if possible;
+        otherwise raises an exception."""
+        vs = self.vertices()
+        if k >= len(vs):
+            raise ValueError, ("cannot build a regular directed graph with " +
+                               "degree >= number of vertices.")
+
+        if (k%  2 == 1):
+            raise ValueError, ("cannot build a regular directed graph with " +
+                               "an odd degree")
+        else:
+            self._add_regular_arcs_even(k)
+
+    def _add_regular_arcs_even(self, k=2):
+        """
+        Make a regular directed graph with degree k.  k must be even.
+        """
+        vs = self.vertices()
+        double = vs * 2
+        #FFFFFF
+        for i, v in enumerate(vs):
+            for j in range(1,k/2+1):
+                w = double[i+j]
+                self.add_arc(Arc(v, w))
+
     def is_strongly_connected(self):
         """If the graph is strongly connected, returns True.
         Else, returns False."""
@@ -143,17 +217,6 @@ class DirectedGraph(Graph):
                 return False
         self.visited_count = None
         return True
-    
-    def complete(self):
-        """completes the graph by adding an edge from every vertex
-        to every vertex"""
-        for v in self.vertices():
-            current_vertex = v
-            for w in self.vertices():
-                if current_vertex == w:
-                    continue
-                e = DirectedEdge(current_vertex,w)
-                self.add_edge(e)
                 
     def is_complete(self):
         """checks if a graph is complete by ensuring that
@@ -279,36 +342,11 @@ class DirectedGraph(Graph):
                 return True
         return False
 
-    def add_regular_edges(self, k=2):
-        """Make a regular directed graph with degree k if possible;
-        otherwise raises an exception."""
-        vs = self.vertices()
-        if k >= len(vs):
-            raise ValueError, ("cannot build a regular directed graph with " +
-                               "degree >= number of vertices.")
-
-        if (k%  2 == 1):
-            raise ValueError, ("cannot build a regular directed graph with " +
-                               "an odd degree")
-        else:
-            self._add_regular_edges_even(k)
-
-    def _add_regular_edges_even(self, k=2):
-        """
-        Make a regular directed graph with degree k.  k must be even.
-        """
-        vs = self.vertices()
-        double = vs * 2
-        
-        for i, v in enumerate(vs):
-            for j in range(1,k/2+1):
-                w = double[i+j]
-                self.add_edge(DirectedEdge(v, w))
                 
-    def add_random_edges(self, p=0.05):
-        """Starting with an edgeless graph, add edges to
+    def add_random_arcs(self, p=0.05):
+        """Starting with an arcless graph, add arcs to
         form a random graph where (p) is the probability 
-        that there is an edge between any pair of vertices.
+        that there is an arc between any pair of vertices.
         Follows the Erdos-Renyi model of a random graph.
         """
         vs = self.vertices()
@@ -316,31 +354,47 @@ class DirectedGraph(Graph):
             for j, w in enumerate(vs):
                 if v == w: continue
                 if random.random() > p: continue
-                self.add_edge(DirectedEdge(v, w))  
+                self.add_arc(Arc(v, w))  
     
-    def rewire(self, p=0.01):
-        """Rewires edges according to the algorithm in Watts and Strogatz.
-        (p) is the probability that each edge is rewired.
+
+
+class WattsStrogatzSmallWorldDirectedGraph(DirectedGraph):
+    def __init__(self,N,k,beta):
         """
-        # consider the edges in random order (this is slightly different
+        Creates a Watts-Strogatz Directed Graph
+        starting with a k-regular graph with N vertices.
+        Rewires the graph with probability beta.
+        """
+        if k % 2 == 1:
+            raise ValueError, 'k must be even'
+        vs = [Vertex(str(i)) for i in range(N)]
+        DirectedGraph.__init__(self,vs,[])
+        self.add_regular_arcs(k)
+        self.rewire(beta)
+        
+    def rewire(self, p=0.01):
+        """Rewires arcs according to the algorithm in Watts and Strogatz.
+        (p) is the probability that each arc is rewired.
+        """
+        # consider the arcs in random order (this is slightly different
         # from Watts and Strogatz)
-        es = list(self.edges())
+        es = list(self.arcs())
         random.shuffle(es)
         vs = self.vertices()
         
         for e in es:
-            # if this edge is chosen, remove it...
+            # if this arc is chosen, remove it...
             if random.random() > p: continue
             v, w = e
-            self.remove_edge(v,w)
+            self.remove_arc(v,w)
 
-            # then generate a new edge that connects v to another vertex
+            # then generate a new arc that connects v to another vertex
             while True:
                 w = random.choice(vs)
-                if v is not w and not self.has_edge(v, w): break
+                if v is not w and not self.has_out_arc(v, w): break
 
-            self.add_edge(DirectedEdge(v, w))
-        
+            self.add_arc(Arc(v, w))    
+
 class SmallWorldDirectedGraph(DirectedGraph):
     """
     Represents a Small World Directed Graph, using the Barabasi-Albert
@@ -360,9 +414,30 @@ class SmallWorldDirectedGraph(DirectedGraph):
         vs = [Vertex(self.iter_labels.next()) for x in range(mo)]
         
         DirectedGraph.__init__(self, vs, [])
-        self.add_random_edges(p=0.5)
         self.mo = mo
+        self.first_time_step()
+        #~ self.add_all_arcs()
         self._initialize_histograms()
+    
+    def first_time_step(self):
+        """
+        We need to create as many initial edges as there are vertices, so we'll
+        iterate through the number of vertices we need to create and connect
+        two random non-identical vertices 
+        """
+        vs = self.vertices()
+        edge_count = 0
+        while edge_count < self.mo:
+            v = random.choice(vs)
+            w = random.choice(vs)
+            if v == w:
+                continue
+            if self.has_arc(v,w):
+                continue
+            else:
+                a = Arc(v,w)
+                self.add_arc(a)
+                edge_count += 1
         
     def _initialize_histograms(self):
         """
@@ -372,14 +447,14 @@ class SmallWorldDirectedGraph(DirectedGraph):
             None
         Creates two lists: node_in_histogram and node_out_histogram. These lists
         contain multiple copies of the same vertex, dependent on how many in
-        and out edges that vertex has. 
+        and out arcs that vertex has. 
         """
         self._node_in_histogram = []
         self._node_out_histogram = []
         for v in self:
-            #for every in edge a vertex has, add it to the node_in_histogram
+            #for every in arc a vertex has, add it to the node_in_histogram
             self._node_in_histogram.extend([v for i in range(self.in_degree(v))])
-            #for eveyr out edge a vertex has, add it to the node_out_histogram
+            #for eveyr out arc a vertex has, add it to the node_out_histogram
             self._node_out_histogram.extend([v for i in range(self.out_degree(v))])
             
     def single_time_step(self):
@@ -392,8 +467,8 @@ class SmallWorldDirectedGraph(DirectedGraph):
         """
         w = Vertex(self.iter_labels.next())
         self.add_vertex(w)
-        #We add an equal number of in and out-edges, so we need to check 
-        #if the number of edges we add is even or odd
+        #We add an equal number of in and out-arcs, so we need to check 
+        #if the number of arcs we add is even or odd
         if self.mo % 2 == 1:
             m = self.mo - 1
         else:
@@ -405,16 +480,16 @@ class SmallWorldDirectedGraph(DirectedGraph):
         #Barabasi-Albert graphs.
         
         for v in random.sample(self._node_in_histogram, m/2):
-            self.add_edge(DirectedEdge(w,v))
+            self.add_arc(Arc(w,v))
             self._node_in_histogram.append(v)
             
         for v in random.sample(self._node_out_histogram, m/2):
-            self.add_edge(DirectedEdge(v,w))
+            self.add_arc(Arc(v,w))
             self._node_in_histogram.append(w)
             self._node_out_histogram.append(v)
             
-        #We've created a bunch of out edges from our new vertex,
-        #so we need to add those edges to our histogram.
+        #We've created a bunch of out arcs from our new vertex,
+        #so we need to add those arcs to our histogram.
         self._node_out_histogram.extend([w for i in range(m/2)])
         
         
@@ -440,7 +515,7 @@ class SmallWorldDirectedGraph(DirectedGraph):
 
 class LoopError(Exception):
     """
-    Vertices cannot have DirectedEdges leading to themselves. 
+    Vertices cannot have Arcs leading to themselves. 
     So we throw an error.
     """
     
@@ -449,12 +524,29 @@ class LoopError(Exception):
         
     def __str__(self):
         return repr(self.parameter)
+        
+class NotApplicableToDirectedGraphs(Exception):
+    """
+    Certain methods from Graph do not apply to DirectedGraph.
+    So we throw an error.
+    """
+    
+    def __init__(self, value):
+        self.parameter = value
+    
+    def __str__(self):
+        return repr(self.parameter)
 
 def main(script,*args):
-    n, mo = 6, 5
-    swdg = SmallWorldDirectedGraph(mo)
-    swdg.build_graph(n)
-    DirectedGraphWorld.show_directed_graph(swdg)
+    #~ n, mo = 6, 5
+    #~ swdg = SmallWorldDirectedGraph(mo)
+    #~ vs = [Vertex(str(i)) for i in range(10)]
+    #~ dg = DirectedGraph(vs,[])
+    #~ dg.add_all_edges()
+    #~ swdg.build_graph(n)
+    dg = SmallWorldDirectedGraph(30)
+    #~ dg.build_graph(10)
+    DirectedGraphWorld.show_directed_graph(dg)
 
 if __name__ == '__main__':
     import sys

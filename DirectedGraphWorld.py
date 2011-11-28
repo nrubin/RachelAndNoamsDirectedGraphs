@@ -2,7 +2,7 @@ import math
 import string
 import random
 from Graph import Vertex, Edge, Graph
-from DirectedGraph import DirectedGraph,SmallWorldDirectedGraph
+#~ from DirectedGraph import DirectedGraph, SmallWorldDirectedGraph
 from GraphWorld import GraphWorld, GraphCanvas, Layout, CircleLayout,RandomLayout
 
 class DirectedGraphCanvas(GraphCanvas):
