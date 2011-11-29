@@ -10,9 +10,9 @@ with graphs.
 """
 
 def etime():
-	"""gets the time at the moment it's called"""
-	user, sys, chuser, chsys, real = os.times()
-	return user+sys
+    """gets the time at the moment it's called"""
+    user, sys, chuser, chsys, real = os.times()
+    return user+sys
 
 
 def knotting_order_of_growth():
@@ -65,6 +65,51 @@ def ErdosRenyiClustering():
     pyplot.xlabel('p')
     pyplot.ylabel('clustering coefficient')
     pyplot.show()
+
+def WattsStrogatzClustering():
+    """
+    Creates an Erdos-Renyi graph of 1000 vertices and iterates through
+    p, checking the clustering coefficient each time. Uses pylot to
+    graph all that stuff, to see if there's anything interesting
+    """
+    import matplotlib.pyplot as pyplot
+    import numpy
+    vs = [Vertex(str(v)) for v in range(100)]
+    cs = []
+    ps = list(numpy.logspace(start=-5,stop=0,num=10))
+    for p in ps:
+        drg = WattsStrogatzSmallWorldDirectedGraph(1000,10,p)
+        cs.append(drg.clustering_coefficient())
+    c_zero = cs[0]
+    cs = [item/c_zero for item in cs]
+    pyplot.plot(ps,cs,'o')
+    pyplot.xlabel('p')
+    pyplot.xscale('log')
+    pyplot.ylabel('clustering coefficient')
+    pyplot.show()
+
+def BarabasiAlbertClustering():
+    """
+    Creates an Erdos-Renyi graph of 1000 vertices and iterates through
+    p, checking the clustering coefficient each time. Uses pylot to
+    graph all that stuff, to see if there's anything interesting
+    """
+    import matplotlib.pyplot as pyplot
+    import numpy
+    cs = []
+    ts = list(numpy.logspace(start=1,stop=3,num=10))
+    for t in ts:
+        swdg = SmallWorldDirectedGraph(1000)
+        swdg.build_graph(int(t))
+        print t
+        cs.append(swdg.clustering_coefficient())
+    #~ c_zero = cs[0]
+    #~ cs = [item/c_zero for item in cs]
+    pyplot.plot(ts,cs,'o')
+    pyplot.xlabel('time steps')
+    pyplot.xscale('log')
+    pyplot.ylabel('clustering coefficient')
+    pyplot.show()
     
 def ErdosRenyiKnotting():
     """
@@ -114,33 +159,34 @@ def WattsStrogatzKnotting():
     
 
 def BarabasiAlbertKnotting():
-    range_mo = range(3,40)
-    legend_tuple = tuple(['mo = ' + str(i) for i in range_mo])
-    for mo in range_mo:
+    for num_graphs in range(5):
+        mo = 5
         t = 1
         num_graphs = 100
         ts = []
         knots = []
-        for i in range(3):
+        for i in range(30):
             knot_count = 0
             for j in range(num_graphs):
                 swdg = SmallWorldDirectedGraph(mo)
                 swdg.build_graph(t)
                 if swdg.has_knot():
                     knot_count += 1
+                del swdg
             knots.append(knot_count/(float(num_graphs)))
             ts.append(t)
             print t
-            t = int(t*10)
+            t = int(t+3)
         pyplot.figure(1)
         pyplot.plot(ts,knots)
         pyplot.xlabel('Time Steps')
         pyplot.ylabel('Probability of having a knot')
-    pyplot.legend(legend_tuple)     
+        #~ mo += 1
     pyplot.show()
 
 
 if __name__ == '__main__':
-    BarabasiAlbertKnotting()
+    #~ WattsStrogatzClustering()
+    BarabasiAlbertClustering()
     
 
