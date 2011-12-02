@@ -90,8 +90,8 @@ def WattsStrogatzClustering():
 
 def BarabasiAlbertClustering():
     """
-    Creates an Erdos-Renyi graph of 1000 vertices and iterates through
-    p, checking the clustering coefficient each time. Uses pylot to
+    Creates an Erdos-Renyi graph of 1000 vertices, for different values
+    of p, checking the clustering coefficient each time. Uses pylot to
     graph all that stuff, to see if there's anything interesting
     """
     import matplotlib.pyplot as pyplot
@@ -103,8 +103,8 @@ def BarabasiAlbertClustering():
         swdg.build_graph(int(t))
         print t
         cs.append(swdg.clustering_coefficient())
-    #~ c_zero = cs[0]
-    #~ cs = [item/c_zero for item in cs]
+    c_zero = cs[0]
+    cs = [item/c_zero for item in cs]
     pyplot.plot(ts,cs,'o')
     pyplot.xlabel('time steps')
     pyplot.xscale('log')
@@ -155,10 +155,10 @@ def WattsStrogatzKnotting():
     print 'nah'
     #~ DirectedGraphWorld.show_directed_graph(dg)
 
-#~ def BarabasiAlbertClustering():
     
 
 def BarabasiAlbertKnotting():
+    #changeme: refactor this
     for num_graphs in range(5):
         mo = 5
         t = 1
