@@ -29,6 +29,16 @@ def getLimitedUrls(parent, url_cache):
     results = [str(l['href']) for l in links if str(l['href']) in url_cache]
     return results
 
+def save_graph(dg,file_location):
+    """
+    Saves a directed graph dg to the file f.
+    """
+    os.popen('rm ' + file_location)
+    os.popen('touch ' + file_location)
+    f = open(file_location,'wb')
+    pickle.dumps(dg,f,protocol = -1)
+    f.close()
+
 index_url = 'http://en.wikipedia.org/wiki/Index_of_neurobiology_articles'
 url_cache = getUrls(index_url)
 
@@ -44,7 +54,9 @@ for url in url_cache:
         dg.add_arc(a)
    
 #~ dgw = DirectedGraphWorld()
-show_directed_graph(dg)
+#~ show_directed_graph(dg)
+os.popen('touch ' + '/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
+save_graph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
 
 #~ test_results = set()
 #~ for key, value in url_dict.items():
