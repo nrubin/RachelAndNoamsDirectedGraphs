@@ -9,11 +9,11 @@ def getUrls(url):
     """Returns a list of URLS linked to from the given page"""
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent','Mozilla/5.0')]
-    try:
-        infile = opener.open(url)
-    except:
-        print 'URL error at ' + url
-        return []
+    #~ try:
+    infile = opener.open(url)
+    #~ except:
+        #~ print 'URL error at ' + url
+        #~ return []
     page = infile.read()
     try:
         soup = BeautifulSoup(page)
@@ -22,7 +22,7 @@ def getUrls(url):
     content_div = soup.find('div',{'class':'mw-content-ltr'})
     try:
         links = content_div.findAll('a')
-        results = [str(l['href']) for l in links if 'wiki' in str(l['href']) ]
+        results = [str(l['href']) for l in links if 'wiki' in str(l['href'])]
     except:
         print 'Content div error at ' + url
         results = []
@@ -32,11 +32,11 @@ def getLimitedUrls(parent, url_cache):
     """Returns a list of URLS linked to from the given page"""
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent','Mozilla/5.0')]
-    try:
-        infile = opener.open("http://en.wikipedia.org" + parent)
-    except:
-        print 'URL error at ' + parent
-        return []
+    #~ try:
+    infile = opener.open("http://en.wikipedia.org" + parent)
+    #~ except:
+        #~ print 'URL error at ' + parent
+        #~ return []
     page = infile.read()
     try:
         soup = BeautifulSoup(page)
