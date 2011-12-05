@@ -85,18 +85,18 @@ def loadGraph(file_location):
     loads a pickled graph from a file and returns it.
     """
     f = open(file_location,'rb')
-    dg5 = pickle.load(f)
+    dg = pickle.load(f)
     return dg
 
 
 #~ index_url = 'http://en.wikipedia.org/wiki/Index_of_neurobiology_articles'
-index_url = 'http://en.wikipedia.org/wiki/Index_of_anatomy_articles'
-dg = makeGraphFromUrls(index_url)
+#~ index_url = 'http://en.wikipedia.org/wiki/Index_of_anatomy_articles'
+#~ dg = makeGraphFromUrls(index_url)
 #~ print dg
-show_directed_graph(dg)
-saveGraph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
-#~ dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
 #~ show_directed_graph(dg)
+#~ saveGraph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
+dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
+show_directed_graph(dg2)
 
 #~ test_results = set()
 #~ for key, value in url_dict.items():
