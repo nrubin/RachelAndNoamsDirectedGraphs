@@ -45,9 +45,11 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         except: continue
         
         #you've made it this far, so you're golden for good links!
-        if url_cache and next_link in url_cache and criteria in next_link:
+        if url_cache and next_link in url_cache and \
+            criteria in next_link and \
+            'Portal' not in next_link:
             results.append(next_link)
-        elif not url_cache and criteria in next_link:
+        elif not url_cache and criteria in next_link and 'Portal' not in next_link:
             results.append(next_link)
         else:
             pass
@@ -60,7 +62,6 @@ def makeGraphFromUrls(index_url):
     index_url. Returns the graph.
     """
     url_cache = get_urls_by_criteria(index_url)
-    print url_cache
     vertices = [Vertex(url) for url in url_cache]
     dg = DirectedGraph(vertices, [])
     url_dict={}
@@ -72,43 +73,59 @@ def makeGraphFromUrls(index_url):
                 dg.add_arc(a)
             except LoopError:
                 print 'Loop Error at ' + url
+        print "Done with edges from ", url, " under ", index_url
     return dg
 
-def saveGraph(dg,file_location):
+def save_object_to_file(dg,file_name):
     """
     Saves a directed graph dg to the file f.
     """
-    os.popen('rm ' + file_location)
-    os.popen('touch ' + file_location)
-    f = open(file_location,'wb')
+
+    f = open(file_name,'wb')
     pickle.dump(dg,f)
     f.close()
     
-def loadGraph(file_location):
+def load_object_from_file(file_name):
     """
     loads a pickled graph from a file and returns it.
     """
-    f = open(file_location,'rb')
+    f = open(file_name,'rb')
     dg = pickle.load(f)
     return dg
 
-def find_all_indices(root, results):
-    
+def find_all_indices(root):
+    results = []
     urls = get_urls_by_criteria(root)
     for url in urls:
         if 'page does not exist' not in url and \
         'redlink' not in url and \
         'php' not in url and \
         'Index' in url:
-            print url
             results.append(url)
+    return results
         
+def parse_indices(name='indices'):
+    root = 'http://en.wikipedia.org/wiki/Portal:Contents/Indexes'
+    indices = find_all_indices(root)
+    save_object_to_file(indices, name +'.txt')
 
-root = 'http://en.wikipedia.org/wiki/Portal:Contents/Indexes'
-RESULTS = []
-find_all_indices(root, RESULTS)
-print len(RESULTS)
-index_url = 'http://en.wikipedia.org/wiki/Index_of_neurobiology_articles'
+def create_graphs():
+    try: indices = load_object_from_file('indices.txt')
+    except:
+        parse_indices()
+        indices = load_object_from_file('indices.txt')
+    
+    for index in indices:
+        try: 
+            load_object_from_file(index + '_graph.txt')
+        except:
+            dg = makeGraphFromUrls(index)
+            save_object_to_file(dg, index + '_graph')
+        
+        
+        
+create_graphs()
+
 #~ index_url = 'http://en.wikipedia.org/wiki/Index_of_anatomy_articles'
 #~ dg = makeGraphFromUrls(index_url)
 #~ print dg
