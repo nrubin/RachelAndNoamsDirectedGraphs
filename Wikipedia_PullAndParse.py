@@ -95,8 +95,9 @@ def loadGraph(file_location):
 #~ print dg
 #~ show_directed_graph(dg)
 #~ saveGraph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
-dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
+dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/PickledAnatomy.txt')
 show_directed_graph(dg2)
+print dg2.has_knot()
 
 #~ test_results = set()
 #~ for key, value in url_dict.items():
