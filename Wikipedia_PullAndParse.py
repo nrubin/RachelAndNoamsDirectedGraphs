@@ -124,22 +124,26 @@ def create_graphs():
         indices = load_object_from_file('indices.txt')
     i = 0
     for index in indices:
-        pull_from_github()
         filename = index[6:] + '_graph.txt'
         try: 
             f = load_object_from_file(filename)
-            del f
             print "loaded ", index[6:]
             i += 1
-            
-        except:
-            whats_left = len(indices) - i
-            print "Creating %s from scratch. %i graphs done, %i left" %(index, i, whats_left)
-            dg = makeGraphFromUrls(index)
-            save_object_to_file(dg, filename)
-            push_to_github(filename)
-            print "saved ", index[6:]
-            i += 1
+        except IOError:
+            try:
+                pull_from_github()
+                f = load_object_from_file(filename)
+                print "loaded ", index[6:]
+                i += 1
+
+            except:
+                whats_left = len(indices) - i
+                print "Creating %s from scratch. %i graphs done, %i left" %(index, i, whats_left)
+                dg = makeGraphFromUrls(index)
+                save_object_to_file(dg, filename)
+                push_to_github(filename)
+                print "saved ", index[6:]
+                i += 1
         
         
 create_graphs()
