@@ -1,13 +1,13 @@
-from DirectedGraph import DirectedGraph, DirectedVertex, Arc
-from knots import Knots
+from DirectedGraph import DirectedGraph, Vertex, Arc
+
 
 import unittest
 
 class TestKnots(unittest.TestCase):
     def setUp(self):
-        self.v = DirectedVertex('v')
-        self.w = DirectedVertex('w')
-        self.x = DirectedVertex('x')
+        self.v = Vertex('v')
+        self.w = Vertex('w')
+        self.x = Vertex('x')
         self.e1 = Arc(self.v, self.w)
         self.e2 = Arc(self.w, self.x)
         self.e3 = Arc(self.x, self.v)
@@ -21,18 +21,18 @@ class TestKnots(unittest.TestCase):
         self.assertEqual(self.dg.has_knot(), True)
   
         #triangular knot w/ an edge into it
-        self.a = DirectedVertex('a')
+        self.a = Vertex('a')
         self.dg.add_vertex(self.a)
         self.Kanye = Arc(self.a,self.v)
         self.dg.add_edge(self.Kanye)
-        self.assertEqual(self.dg.has_knot(),True)
+        self.assertTrue(self.dg.has_knot())
     
     def test_ngon_with_chord(self):
-        v1 = DirectedVertex('v1')
-        v2 = DirectedVertex('v2')
-        v3 = DirectedVertex('v3')
-        v4 = DirectedVertex('v4')
-        v5 = DirectedVertex('v5')
+        v1 = Vertex('v1')
+        v2 = Vertex('v2')
+        v3 = Vertex('v3')
+        v4 = Vertex('v4')
+        v5 = Vertex('v5')
         e1 = Arc(v2,v1)
         e2 = Arc(v3,v2)
         e3 = Arc(v3,v4)

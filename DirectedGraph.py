@@ -177,7 +177,7 @@ class DirectedGraph(Graph):
             raise ValueError, ("cannot build a regular directed graph with " +
                                "degree >= number of vertices.")
 
-        if (k%  2 == 1):
+        if (k % 2 == 1):
             raise ValueError, ("cannot build a regular directed graph with " +
                                "an odd degree")
         else:
@@ -275,6 +275,7 @@ class DirectedGraph(Graph):
         # initialize the queue with the start vertex
         queue = [s]
         visited = set()
+        on_first_vertex = True
         while queue:
 
             # get the next vertex
@@ -283,25 +284,20 @@ class DirectedGraph(Graph):
             # skip it if it's already marked
             if v in visited: continue
 
-            # mark it visited, then invoke visit
-            if v != s: visited.add(v)
-
+            # if we're on the first vertex, we're not actually visting
+            if v != s or not on_first_vertex: visited.add(v)
+            on_first_vertex = False
             
             for x in self.out_vertices(v):
-                
                 #if its out vertices have been cached, update visited
                 if x in self._knot_cache.keys():
                     visited.update(self._knot_cache[x])
                     visited.add(x)
                     
-                #otherwise add its out vertices to the queue
+                #otherwise add it to the queue
                 elif x not in self._knot_cache.keys():
                     queue.append(x)
-                    
-        self._knot_cache[s] = visited
-        
-        #ensures that s was not added to visited b/c of being in a cache
-        if s in visited: self._knot_cache[s].remove(s)
+
         return visited
 
     def _knot_at_v(self, v):
@@ -313,7 +309,7 @@ class DirectedGraph(Graph):
         Returns True if this is case; indicates v is entrance to knot.
         """
         t = self._knot_cache.get(v, None)
-
+        #print "Vertex: %s, Reachables: %s" %(str(v), str(t))
         if len(t) == 0:
             return False
             
@@ -322,7 +318,7 @@ class DirectedGraph(Graph):
                 if len(s) == 0:
                     return False
                 x = s.symmetric_difference(t)
-                if x != set([v, w]):
+                if x != set([]):
                     return False
 
         return True

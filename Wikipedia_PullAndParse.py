@@ -47,9 +47,14 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         #you've made it this far, so you're golden for good links!
         if url_cache and next_link in url_cache and \
             criteria in next_link and \
+            'redlink' not in next_link and \
+            'php' not in next_link and\
             'Portal' not in next_link:
             results.append(next_link)
-        elif not url_cache and criteria in next_link and 'Portal' not in next_link:
+        elif not url_cache and criteria in next_link and \
+            'redlink' not in next_link and \
+            'php' not in next_link and \
+            'Portal' not in next_link:
             results.append(next_link)
         else:
             pass
@@ -122,28 +127,18 @@ def create_graphs():
     except:
         parse_indices()
         indices = load_object_from_file('indices.txt')
-    i = 0
+
     for index in indices:
         filename = index[6:] + '_graph.txt'
         try: 
             f = load_object_from_file(filename)
-            print "loaded ", index[6:]
+            print "Loaded %s" %(filename)
             i += 1
         except IOError:
-            try:
-                pull_from_github()
-                f = load_object_from_file(filename)
-                print "loaded ", index[6:]
-                i += 1
+            dg = makeGraphFromUrls(index)
+            save_object_to_file(dg, filename)
+            print "Saved %s" %(filename)
 
-            except:
-                whats_left = len(indices) - i
-                print "Creating %s from scratch. %i graphs done, %i left" %(index, i, whats_left)
-                dg = makeGraphFromUrls(index)
-                save_object_to_file(dg, filename)
-                push_to_github(filename)
-                print "saved ", index[6:]
-                i += 1
         
         
 create_graphs()
