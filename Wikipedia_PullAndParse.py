@@ -79,8 +79,7 @@ def save_object_to_file(dg,file_name):
     """
     Saves a directed graph dg to the file f.
     """
-    
-    f = open(file_name + '.txt','wb')
+    f = open(file_name,'wb')
     pickle.dump(dg,f)
     f.close()
     
@@ -108,25 +107,36 @@ def parse_indices(name='indices'):
     indices = find_all_indices(root)
     save_object_to_file(indices, name)
 
+def push_to_github(filename):
+    import os
+    os.popen('git add ' + filename)
+    os.popen('git commit -m "committing graph: ' + filename + '"')
+    os.popen('git push origin master')
+
+
 def create_graphs():
     try: 
         indices = load_object_from_file('indices.txt')
     except:
         parse_indices()
         indices = load_object_from_file('indices.txt')
-    
+    i = 0
     for index in indices:
+        filename = index[6:] + '_graph.txt'
         try: 
-            f = load_object_from_file(index[6:] + '_graph.txt')
+            f = load_object_from_file(filename)
             del f
             print "loaded ", index[6:]
+            i += 1
             
         except:
-            print "Creating ", index, " from scratch"
+            whats_left = len(indices) - i
+            print "Creating %s from scratch. %i graphs done, %i left" %(index, i, whats_left)
             dg = makeGraphFromUrls(index)
-            save_object_to_file(dg, index[6:] + '_graph')
+            save_object_to_file(dg, filename)
+            push_to_github(filename)
             print "saved ", index[6:]
-        
+            i += 1
         
         
 create_graphs()
