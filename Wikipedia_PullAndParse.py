@@ -5,63 +5,67 @@ import urllib2
 from DirectedGraph import DirectedGraph, Arc, Vertex, LoopError
 from DirectedGraphWorld import show_directed_graph
 
-def getUrls(url):
-    """Returns a list of URLS linked to from the given page"""
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-agent','Mozilla/5.0')]
-    try:
-        infile = opener.open(url)
-    except:
-        print 'URL error at ' + url
-        return []
-    page = infile.read()
-    try:
-        soup = BeautifulSoup(page)
-    except:
-        print 'Soup error at ' + url
-    content_div = soup.find('div',{'class':'mw-content-ltr'})
-    try:
-        links = content_div.findAll('a')
-        results = [str(l['href']) for l in links if 'wiki' in str(l['href'])]
-    except:
-        print 'Content div error at ' + url
-        results = []
-    return results
 
-def getLimitedUrls(parent, url_cache):
+def get_urls_by_criteria(parent, url_cache=None, criteria=''):
     """Returns a list of URLS linked to from the given page"""
+    
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent','Mozilla/5.0')]
+    
+    #catches invalid links
     try:
-        infile = opener.open("http://en.wikipedia.org" + parent)
+        if 'http' not in parent:
+            infile = opener.open("http://en.wikipedia.org" + parent)
+        else:
+            infile = opener.open(parent)
     except:
         print 'URL error at ' + parent
         return []
     page = infile.read()
+ 
+    #catches pages that are unparsable b/c of unicode in text
     try:
         soup = BeautifulSoup(page)
     except:
         print 'Soup error at ' + parent
+        return []
+        
+    #catches pages that are not formatted according to the standard
     try:
         content_div = soup.find('div',{'class':'mw-content-ltr'})
         links = content_div.findAll('a')
-        results = [str(l['href']) for l in links if str(l['href']) in url_cache and 'wiki' in str(l['href'])]
     except:
         print 'Content div error at ' + parent
-        results = []
+        return []
+
+    results = []
+    for l in links:
+        #catches the case where there's <a></a> without an href
+        try: next_link = str(l['href'])
+        except: continue
+        
+        #you've made it this far, so you're golden for good links!
+        if url_cache and next_link in url_cache and criteria in next_link:
+            results.append(next_link)
+        elif not url_cache and criteria in next_link:
+            results.append(next_link)
+        else:
+            pass
+
     return results
-    
+
 def makeGraphFromUrls(index_url):
     """
     creates a graph from the wikipedia URLS listed in
     index_url. Returns the graph.
     """
-    url_cache = getUrls(index_url)
+    url_cache = get_urls_by_criteria(index_url)
+    print url_cache
     vertices = [Vertex(url) for url in url_cache]
     dg = DirectedGraph(vertices, [])
     url_dict={}
     for url in url_cache:
-        url_dict[url] = getLimitedUrls(url, url_cache)
+        url_dict[url] = get_urls_by_criteria(url, url_cache, criteria='wiki')
         for out in url_dict[url]:
             try:
                 a = Arc(Vertex(url), Vertex(out))
@@ -88,16 +92,31 @@ def loadGraph(file_location):
     dg = pickle.load(f)
     return dg
 
+def find_all_indices(root, results):
+    
+    urls = get_urls_by_criteria(root)
+    for url in urls:
+        if 'page does not exist' not in url and \
+        'redlink' not in url and \
+        'php' not in url and \
+        'Index' in url:
+            print url
+            results.append(url)
+        
 
-#~ index_url = 'http://en.wikipedia.org/wiki/Index_of_neurobiology_articles'
+root = 'http://en.wikipedia.org/wiki/Portal:Contents/Indexes'
+RESULTS = []
+find_all_indices(root, RESULTS)
+print len(RESULTS)
+index_url = 'http://en.wikipedia.org/wiki/Index_of_neurobiology_articles'
 #~ index_url = 'http://en.wikipedia.org/wiki/Index_of_anatomy_articles'
 #~ dg = makeGraphFromUrls(index_url)
 #~ print dg
 #~ show_directed_graph(dg)
 #~ saveGraph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
-dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/PickledAnatomy.txt')
-show_directed_graph(dg2)
-print dg2.has_knot()
+#~ dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/PickledAnatomy.txt')
+#~ show_directed_graph(dg2)
+#~ print dg2.has_knot()
 
 #~ test_results = set()
 #~ for key, value in url_dict.items():
@@ -106,3 +125,4 @@ print dg2.has_knot()
         #~ 
 #~ print test_results
 #~ print set(url_cache)
+
