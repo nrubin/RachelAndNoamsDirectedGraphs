@@ -108,11 +108,13 @@ def parse_indices(name='indices'):
     save_object_to_file(indices, name)
 
 def push_to_github(filename):
-    import os
+
     os.popen('git add ' + filename)
     os.popen('git commit -m "committing graph: ' + filename + '"')
     os.popen('git push origin master')
 
+def pull_from_github():
+    os.popen('git pull origin master')
 
 def create_graphs():
     try: 
@@ -122,6 +124,7 @@ def create_graphs():
         indices = load_object_from_file('indices.txt')
     i = 0
     for index in indices:
+        pull_from_github()
         filename = index[6:] + '_graph.txt'
         try: 
             f = load_object_from_file(filename)
