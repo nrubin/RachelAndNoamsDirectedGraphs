@@ -19,7 +19,7 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         else:
             infile = opener.open(parent)
     except:
-        print 'URL error at ' + parent
+        #print 'URL error at ' + parent
         return []
     page = infile.read()
  
@@ -27,7 +27,7 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
     try:
         soup = BeautifulSoup(page)
     except:
-        print 'Soup error at ' + parent
+        #print 'Soup error at ' + parent
         return []
         
     #catches pages that are not formatted according to the standard
@@ -35,7 +35,7 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         content_div = soup.find('div',{'class':'mw-content-ltr'})
         links = content_div.findAll('a')
     except:
-        print 'Content div error at ' + parent
+        #print 'Content div error at ' + parent
         return []
 
     results = []
@@ -73,15 +73,14 @@ def makeGraphFromUrls(index_url):
                 dg.add_arc(a)
             except LoopError:
                 print 'Loop Error at ' + url
-        print "Done with edges from ", url, " under ", index_url
     return dg
 
 def save_object_to_file(dg,file_name):
     """
     Saves a directed graph dg to the file f.
     """
-
-    f = open(file_name,'wb')
+    
+    f = open(file_name + '.txt','wb')
     pickle.dump(dg,f)
     f.close()
     
@@ -107,20 +106,26 @@ def find_all_indices(root):
 def parse_indices(name='indices'):
     root = 'http://en.wikipedia.org/wiki/Portal:Contents/Indexes'
     indices = find_all_indices(root)
-    save_object_to_file(indices, name +'.txt')
+    save_object_to_file(indices, name)
 
 def create_graphs():
-    try: indices = load_object_from_file('indices.txt')
+    try: 
+        indices = load_object_from_file('indices.txt')
     except:
         parse_indices()
         indices = load_object_from_file('indices.txt')
     
     for index in indices:
         try: 
-            load_object_from_file(index + '_graph.txt')
+            f = load_object_from_file(index[6:] + '_graph.txt')
+            del f
+            print "loaded ", index[6:]
+            
         except:
+            print "Creating ", index, " from scratch"
             dg = makeGraphFromUrls(index)
-            save_object_to_file(dg, index + '_graph')
+            save_object_to_file(dg, index[6:] + '_graph')
+            print "saved ", index[6:]
         
         
         
