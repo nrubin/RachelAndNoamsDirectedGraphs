@@ -107,7 +107,7 @@ def find_all_indices(root):
             results.append(url)
     return results
         
-def parse_indices(name='indices'):
+def parse_indices(name='indices.txt'):
     root = 'http://en.wikipedia.org/wiki/Portal:Contents/Indexes'
     indices = find_all_indices(root)
     save_object_to_file(indices, name)
@@ -135,6 +135,7 @@ def create_graphs():
             print "Loaded %s" %(filename)
             i += 1
         except IOError:
+            print "Staring %S" %(filename)
             dg = makeGraphFromUrls(index)
             save_object_to_file(dg, filename)
             print "Saved %s" %(filename)
