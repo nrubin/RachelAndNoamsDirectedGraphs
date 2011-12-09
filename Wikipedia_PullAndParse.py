@@ -19,7 +19,6 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         else:
             infile = opener.open(parent)
     except:
-        #print 'URL error at ' + parent
         return []
     page = infile.read()
  
@@ -27,7 +26,6 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
     try:
         soup = BeautifulSoup(page)
     except:
-        #print 'Soup error at ' + parent
         return []
         
     #catches pages that are not formatted according to the standard
@@ -35,7 +33,6 @@ def get_urls_by_criteria(parent, url_cache=None, criteria=''):
         content_div = soup.find('div',{'class':'mw-content-ltr'})
         links = content_div.findAll('a')
     except:
-        #print 'Content div error at ' + parent
         return []
 
     results = []
@@ -76,8 +73,8 @@ def makeGraphFromUrls(index_url):
             try:
                 a = Arc(Vertex(url), Vertex(out))
                 dg.add_arc(a)
-            except LoopError:
-                print 'Loop Error at ' + url
+            except LoopError: 
+                pass
     return dg
 
 def save_object_to_file(dg,file_name):
@@ -112,15 +109,6 @@ def parse_indices(name='indices.txt'):
     indices = find_all_indices(root)
     save_object_to_file(indices, name)
 
-def push_to_github(filename):
-
-    os.popen('git add ' + filename)
-    os.popen('git commit -m "committing graph: ' + filename + '"')
-    os.popen('git push origin master')
-
-def pull_from_github():
-    os.popen('git pull origin master')
-
 def create_graphs():
     try: 
         indices = load_object_from_file('indices.txt')
@@ -141,23 +129,11 @@ def create_graphs():
             print "Saved %s" %(filename)
 
         
-        
-create_graphs()
+def main():        
+    create_graphs()
 
-#~ index_url = 'http://en.wikipedia.org/wiki/Index_of_anatomy_articles'
-#~ dg = makeGraphFromUrls(index_url)
-#~ print dg
-#~ show_directed_graph(dg)
-#~ saveGraph(dg,'/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/wiki_graph1.txt')
-#~ dg2 = loadGraph('/home/nrubin/Dropbox/School/_Fall2011/Computational_Modeling/RachelAndNoamsDirectedGraphs/PickledAnatomy.txt')
-#~ show_directed_graph(dg2)
-#~ print dg2.has_knot()
+if __name__ == '__main__':
+    main()
 
-#~ test_results = set()
-#~ for key, value in url_dict.items():
-    #~ for item in value:
-        #~ test_results.add(item)
-        #~ 
-#~ print test_results
-#~ print set(url_cache)
+
 
