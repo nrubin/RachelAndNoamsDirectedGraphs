@@ -7,6 +7,7 @@ import numpy
 import matplotlib.pyplot as pyplot
 from DirectedGraph import *
 import math
+from multiprocessing import Pool
 #clustering coeff. vs number of vertices
 
 #proportion of knots
@@ -113,7 +114,7 @@ def CompareToBA():
     
     Let's multithread this shit
     """
-    from multiprocessing import Pool
+
     cs, k, vs, es = GetResultList()
     #~ dg = BADirectedGraph()
     avg_deg_data = [item[0] / float(item[1]) for item in zip(es,vs)]
@@ -181,6 +182,61 @@ def SomeDistributions(results):
     print sum(vs)
     
 
+def compare_wikipedia_to_ba():
+    indices = load_object_from_file('../Graphs/indices.txt')
+    graphs = []
+    for index in indices:
+        try:
+            results = load_object_from_file('../Results/' + index[6:] + '_results.txt')
+            if results.vertices > 4000:
+                graph = load_object_from_file('../Graphs/' + index[6:] + '_graph.txt')
+                graphs.append((index[6:], graph))
+        except:
+            pass
+            
+    for name, graph in graphs:
+        degs_in, degs_out, degs_tot = [], [], []
+        for vertex in graph.vertices():
+            deg_in = graph.in_degree(vertex)
+            deg_out = graph.out_degree(vertex)
+            deg_tot = deg_in + deg_out
+            
+            degs_in.append(deg_in)
+            degs_out.append(deg_out)
+            degs_tot.append(deg_tot)
+
+        pmf = Pmf.MakePmfFromList(degs_tot)
+        xs, ys = pmf.Render()
+        xs_log = []
+        ys_log = []
+        for x in xs:
+            if x <= 0:
+                xs_log.append(.00001)
+            else:
+                xs_log.append(math.log(x))
+        for y in ys:
+            if y <= 0:
+                ys_log.append(.00001)
+            else:
+                ys_log.append(math.log(y))
+        coefs = numpy.lib.polyfit(xs_log, ys_log, 1)
+        fit_y = numpy.lib.polyval(coefs, xs_log)
+        print coefs
+        fit_y_log = [math.exp(1) ** f for f in fit_y]
+        pyplot.plot(xs, ys, 'o')
+        pyplot.plot(xs, fit_y_log,'r--',linewidth=4)
+        pyplot.xscale('log')
+        pyplot.xlabel('k')
+        pyplot.ylabel('P(k)')
+        title = 
+        pyplot.title('Proof that Wikpedia is Scale Free')
+        pyplot.yscale('log')
+        pyplot.show()
+        pyplot.savefig()
+        
+        #get a BA graph w/ same number of vertices; show that its coefficient is the same
+
+        
 
 if __name__ == '__main__':
-    CompareToBA()
+    compare_wikipedia_to_ba()
