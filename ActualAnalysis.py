@@ -131,7 +131,9 @@ def CompareToBA():
         print count
         
     po = Pool()
-    for pair in deg_vs[:-100]:
+    #~ deg_vs.sort()
+    deg_vs = deg_vs
+    for pair in deg_vs:
         po.apply_async(ParseGraph,(pair,),callback=cb)
         
     po.close()
@@ -140,29 +142,34 @@ def CompareToBA():
     pyplot.plot(cs,sim_cs,'o')
     pyplot.xlabel('Real Clustering Coefficients')
     pyplot.ylabel('Model Clustering Coefficients')
+    pyplot.xscale('log')
+    pyplot.yscale('log')
     pyplot.title('Real vs. Modeled Clustering Coefficients')
-    pyplot.savefig('ClusteringCompare', dpi=300,format='pdf')
-    pyplot.figure(2)
-    pyplot.plot(avg_deg_data,sim_deg,'o')
-    pyplot.xlabel('Real Average Degree')
-    pyplot.ylabel('Model Average Degree')
-    pyplot.title('Real vs. Modeled Degrees')
-    pyplot.savefig('DegreeCompare', dpi=300,format='pdf')
+    pyplot.savefig('ClusteringCompareLog', dpi=300,format='pdf')
+    #~ pyplot.figure(2)
+    #~ pyplot.plot(avg_deg_data,sim_deg,'o')
+    #~ pyplot.xlabel('Real Average Degree')
+    #~ pyplot.ylabel('Model Average Degree')
+    #~ pyplot.title('Real vs. Modeled Degrees')
+    #~ pyplot.savefig('DegreeCompare', dpi=300,format='pdf')
     pyplot.show()
     return
     
 def ParseGraph(pair):
-	try:
-		deg = pair[0]
-		num_vs = pair[1]
-		dg = BADirectedGraph(int(math.floor(deg)))
-		dg.build_graph(int(num_vs-deg))
-		d = len(dg.edges())/float(len(dg.vertices()))
-		c = dg.clustering_coefficient()
-		print c, d
-		return(c,d)
-	except:
-		return
+    try:
+        deg = pair[1]
+        num_vs = pair[0]
+        init_vert = int(math.ceil(deg))
+        num_timesteps = int(num_vs-deg)
+        if init_vert < 5:
+			init_vert = 5
+        dg = BADirectedGraph(init_vert)
+        dg.build_graph(num_timesteps)
+        d = len(dg.edges())/float(len(dg.vertices()))
+        c = dg.clustering_coefficient()
+        return(c,d)
+    except:
+        return
     
 def SomeDistributions(results):
     c = Cdf.MakeCdfFromList(vs)
