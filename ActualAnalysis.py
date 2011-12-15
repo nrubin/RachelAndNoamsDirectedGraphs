@@ -1,12 +1,13 @@
 from Wikipedia_PullAndParse import load_object_from_file, save_object_to_file
 from multithread_analysis import *
-import Cdf
-import Pmf
+#import Cdf
+#import Pmf
 import myplot
 import numpy
 import matplotlib.pyplot as pyplot
 from DirectedGraph import *
 import math
+from multiprocessing import Pool
 #clustering coeff. vs number of vertices
 
 #proportion of knots
@@ -113,7 +114,7 @@ def CompareToBA():
     
     Let's multithread this shit
     """
-    from multiprocessing import Pool
+
     cs, k, vs, es = GetResultList()
     #~ dg = BADirectedGraph()
     avg_deg_data = [item[0] / float(item[1]) for item in zip(es,vs)]
@@ -174,6 +175,27 @@ def SomeDistributions(results):
     print sum(vs)
     
 
+def compare_wikipedia_to_ba():
+    indices = load_object_from_file('../Graphs/indices.txt')
+    graphs = []
+    for index in indices:
+        try:
+            results = load_object_from_file('../Results/' + index[6:] + '_results.txt')
+            if results.vertices > 4000:
+                graph = load_object_from_file('../Graphs/' + index[6:] + '_graph.txt')
+                graphs.append(graph)
+        except:
+            pass
+            
+    for graph in graphs:
+        degs_in, degs_out, degs_tot = [], [], []
+        for vertex in graph.vertices():
+            deg_in = graph.in_degree(vertex)
+            deg_out = graph.out_degree(vertex)
+            deg_tot = deg_in + deg_out
+
+
+        
 
 if __name__ == '__main__':
-    CompareToBA()
+    compare_wikipedia_to_ba()
