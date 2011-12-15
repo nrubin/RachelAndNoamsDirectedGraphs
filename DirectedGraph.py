@@ -354,7 +354,7 @@ class DirectedGraph(Graph):
     
 
 
-class WattsStrogatzSmallWorldDirectedGraph(DirectedGraph):
+class WSDirectedGraph(DirectedGraph):
     def __init__(self,N,k,beta):
         """
         Creates a Watts-Strogatz Directed Graph
@@ -391,7 +391,7 @@ class WattsStrogatzSmallWorldDirectedGraph(DirectedGraph):
 
             self.add_arc(Arc(v, w))    
 
-class SmallWorldDirectedGraph(DirectedGraph):
+class BADirectedGraph(DirectedGraph):
     """
     Represents a Small World Directed Graph, using the Barabasi-Albert
     algorithm to generate a small world graph.
@@ -540,7 +540,7 @@ def main(script,*args):
     #~ dg = DirectedGraph(vs,[])
     #~ dg.add_all_edges()
     #~ swdg.build_graph(n)
-    dg = SmallWorldDirectedGraph(30)
+    dg = BADirectedGraph(30)
     #~ dg.build_graph(10)
     DirectedGraphWorld.show_directed_graph(dg)
 
