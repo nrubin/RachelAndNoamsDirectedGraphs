@@ -534,15 +534,17 @@ class NotApplicableToDirectedGraphs(Exception):
         return repr(self.parameter)
 
 def main(script,*args):
-    #~ n, mo = 6, 5
-    #~ swdg = SmallWorldDirectedGraph(mo)
-    #~ vs = [Vertex(str(i)) for i in range(10)]
+	v2 = Vertex('B')
+	v1 = Vertex('A')
+	a1 = Arc(v1,v2)
+	dg = DirectedGraph([v2,v1],[a1])
+	DirectedGraphWorld.show_directed_graph(dg)
     #~ dg = DirectedGraph(vs,[])
     #~ dg.add_all_edges()
     #~ swdg.build_graph(n)
-    dg = BADirectedGraph(30)
+    #~ dg = BADirectedGraph(30)
     #~ dg.build_graph(10)
-    DirectedGraphWorld.show_directed_graph(dg)
+    #~ DirectedGraphWorld.show_directed_graph(dg)
 
 if __name__ == '__main__':
     import sys

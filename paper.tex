@@ -4,6 +4,13 @@
 \begin{document}
 \chapter {Directed Graphs}
 \section{Why do directed graphs matter?}
+Imagine that it’s 2am during finals week, and you’re scrambling to finish your research paper on topica obscura. Your adrenaline jumps when you finally find a relevant Wikipedia article, with links to more Wikipedia articles! You start clicking away, jumping from page to page in search of facts. An hour later, you realize you’re still clicking, but these are pages you’ve already visited. No matter which link you click, you can’t seem to discover any new pages! 
+
+If this situation has ever happened to you, then you’ve unknowingly (and unfortunately) stumbled upon a knot in Wikipedia. Knots are a unique property of directed graphs. To understand them, it’s necessary to have a basic understanding of directed graphs.
+	 	 	
+So far in this book, all of the graphs we’ve encountered have been undirected graphs. In an undirected graph, a single edge connects two vertices, and an edge from vertex V to vertex W is the same as an edge from W to V. This abstraction works well to describe some real-world systems (such as social networks and transportation networks), but it isn’t detailed enough to describe the Internet, including Wikipedia. 
+
+On Wikipedia, connections between pages do not have to be mutual. Page A might link readers to page B, but page B doesn’t have to include any links to page A. Is there an edge between A and B? Absolutely, but knowing that an edge exists is not enough information. To understand the relationship between pages A and B, we need two bits of information: whether A links to B, and whether B links to A . This is the essence of a directed graph.
 \section{Directed graph implementation}
 \section{Knots algorithm}
 \section{Knots in Wikipedia}
