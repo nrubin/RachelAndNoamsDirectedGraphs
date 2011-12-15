@@ -195,18 +195,22 @@ def compare_wikipedia_to_ba():
             pass
             
     for name, graph in graphs:
-        degs_in, degs_out, degs_tot = [], [], []
+        #build list of in degree, out degree, total of each vertex
+        ins, outs, totals = [], [], []
         for vertex in graph.vertices():
             deg_in = graph.in_degree(vertex)
             deg_out = graph.out_degree(vertex)
             deg_tot = deg_in + deg_out
             
-            degs_in.append(deg_in)
-            degs_out.append(deg_out)
-            degs_tot.append(deg_tot)
-
-        pmf = Pmf.MakePmfFromList(degs_tot)
+            ins.append(deg_in)
+            outs.append(deg_out)
+            totals.append(deg_tot)
+    
+        #create a pmf of degrees
+        pmf = Pmf.MakePmfFromList(outs)
         xs, ys = pmf.Render()
+        
+        #convert to log, so we can find line of best fit
         xs_log = []
         ys_log = []
         for x in xs:
@@ -222,19 +226,70 @@ def compare_wikipedia_to_ba():
         coefs = numpy.lib.polyfit(xs_log, ys_log, 1)
         fit_y = numpy.lib.polyval(coefs, xs_log)
         print coefs
+        
+        #transform fit line, to plot it on log-log scale
         fit_y_log = [math.exp(1) ** f for f in fit_y]
+        
         pyplot.plot(xs, ys, 'o')
         pyplot.plot(xs, fit_y_log,'r--',linewidth=4)
         pyplot.xscale('log')
+        pyplot.yscale('log')
         pyplot.xlabel('k')
         pyplot.ylabel('P(k)')
-        title = 
-        pyplot.title('Proof that Wikpedia is Scale Free')
-        pyplot.yscale('log')
-        pyplot.show()
-        pyplot.savefig()
+
+        #pyplot.show()
+        title = 'out_degree_' + name
+        pyplot.savefig(title)
         
-        #get a BA graph w/ same number of vertices; show that its coefficient is the same
+        pyplot.clf()
+        #BA graph w/ same # of vs; show that coefficient is the same
+        vs = graph.vertices()
+        bag = BADirectedGraph(5)
+        bag.build_graph(len(vs)-5)
+        ins, outs, totals = [], [], []
+        for vertex in bag.vertices():
+            deg_in = bag.in_degree(vertex)
+            deg_out = bag.out_degree(vertex)
+            deg_tot = deg_in + deg_out
+            
+            ins.append(deg_in)
+            outs.append(deg_out)
+            totals.append(deg_tot)
+        pmf = Pmf.MakePmfFromList(outs)
+        xs, ys = pmf.Render()
+        
+        #convert to log, so we can find line of best fit
+        xs_log = []
+        ys_log = []
+        for x in xs:
+            if x <= 0:
+                xs_log.append(.00001)
+            else:
+                xs_log.append(math.log(x))
+        for y in ys:
+            if y <= 0:
+                ys_log.append(.00001)
+            else:
+                ys_log.append(math.log(y))
+        coefs = numpy.lib.polyfit(xs_log, ys_log, 1)
+        fit_y = numpy.lib.polyval(coefs, xs_log)
+        print coefs
+        
+        #transform fit line, to plot it on log-log scale
+        fit_y_log = [math.exp(1) ** f for f in fit_y]
+        
+        pyplot.plot(xs, ys, 'o')
+        pyplot.plot(xs, fit_y_log,'r--',linewidth=4)
+        pyplot.xscale('log')
+        pyplot.yscale('log')
+        pyplot.xlabel('k')
+        pyplot.ylabel('P(k)')
+
+        pyplot.show()
+        title = 'out_degree_BA_on_' + str(len(vs)) +'_vertices'
+        pyplot.savefig(title)
+
+        
 
         
 
