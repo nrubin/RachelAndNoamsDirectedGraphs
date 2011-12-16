@@ -8,21 +8,8 @@ import matplotlib.pyplot as pyplot
 from DirectedGraph import *
 import math
 from multiprocessing import Pool
-#clustering coeff. vs number of vertices
+import StatTools
 
-#proportion of knots
-
-#total number of vertices
-def total_number_of_vertices():
-    #import indices.txt
-    count = 0
-    for key,val in megadict:
-        count += val.n_vs
-    return count
-    indices = load_object_from_file('../Graphs/indices.txt')
-    
-    for index in indices: pass
-    
 def GetResultList():
     """
     Returns a list of tuples containing the list of:
@@ -95,6 +82,11 @@ def BinnedKnots(zipped,numBins):
     return returnDict, binSize
 
 def ShowBinnedKnots():
+    """
+    Plots clustering coefficient vs. probability of a knot existing, 
+    for the set of 558 graphs of wikipedia subsets
+    """
+    cs, k, vs, es = GetResultList()
     d, bin_size = BinnedKnots(zip(cs,k),10)
     x = []
     y = []
@@ -103,74 +95,40 @@ def ShowBinnedKnots():
         y.append(val)
     pyplot.bar(x, y,bin_size,facecolor='r')
     pyplot.xlabel('Clustering Coefficient')
-    pyplot.ylabel('p')
-    pyplot.title('Distribution of Proportion of Knots')
+    pyplot.ylabel('p(knot exists)')
+    pyplot.grid(True)
+    pyplot.show()
+    pyplot.savefig('clustering_vs_knots')
+
+
+def vertices_vs_pknot():
+    """
+    Plots the number of vertices vs probability of a  knot existing, 
+    for the set  of 558 graphs of wikipedia subgraphs
+    """
+    cs, k, vs, es = GetResultList()
+    d, bin_size = BinnedKnots(zip(vs, k), 25)
+    x, y = [], []
+    for key, val in d.items():
+        x.append(key)
+        y.append(val)
+    d2, bin_size2 = StatTools.binData(vs,25)
+    x2, y2 = [], []
+    for key, val in d2.items():
+        x2.append(key)
+        y2.append(val)
+    new_probs = [item[0] * item[1] for item in zip(y,y2)]        
+    
+    pyplot.bar(x, y, bin_size, facecolor='r')
+    pyplot.xlabel("Number of vertices")
+    pyplot.ylabel('p(knot exists)')
+    pyplot.bar(x2,y2,bin_size2, facecolor='b')
+    pyplot.bar(x2,new_probs,bin_size2, facecolor='g')
     pyplot.grid(True)
     pyplot.show()
 
-def CompareToBA():
-    """
-    Let's generate some similar Barabasi Albert graphs and compare stuff
-    
-    Let's multithread this shit
-    """
 
-    cs, k, vs, es = GetResultList()
-    #~ dg = BADirectedGraph()
-    avg_deg_data = [item[0] / float(item[1]) for item in zip(es,vs)]
-    deg_vs = zip(vs,avg_deg_data)
-    sim_cs = []
-    sim_deg = []
-    global count
-    count = 0
     
-    def cb(aTup):
-        sim_cs.append(aTup[0])
-        sim_deg.append(aTup[1]) 
-        global count
-        count += 1
-        print count
-        
-    po = Pool()
-    #~ deg_vs.sort()
-    deg_vs = deg_vs
-    for pair in deg_vs:
-        po.apply_async(ParseGraph,(pair,),callback=cb)
-        
-    po.close()
-    po.join()
-    pyplot.figure(1)
-    pyplot.plot(cs,sim_cs,'o')
-    pyplot.xlabel('Real Clustering Coefficients')
-    pyplot.ylabel('Model Clustering Coefficients')
-    pyplot.xscale('log')
-    pyplot.yscale('log')
-    pyplot.title('Real vs. Modeled Clustering Coefficients')
-    pyplot.savefig('ClusteringCompareLog', dpi=300,format='pdf')
-    #~ pyplot.figure(2)
-    #~ pyplot.plot(avg_deg_data,sim_deg,'o')
-    #~ pyplot.xlabel('Real Average Degree')
-    #~ pyplot.ylabel('Model Average Degree')
-    #~ pyplot.title('Real vs. Modeled Degrees')
-    #~ pyplot.savefig('DegreeCompare', dpi=300,format='pdf')
-    pyplot.show()
-    return
-    
-def ParseGraph(pair):
-    try:
-        deg = pair[1]
-        num_vs = pair[0]
-        init_vert = int(math.ceil(deg))
-        num_timesteps = int(num_vs-deg)
-        if init_vert < 5:
-			init_vert = 5
-        dg = BADirectedGraph(init_vert)
-        dg.build_graph(num_timesteps)
-        d = len(dg.edges())/float(len(dg.vertices()))
-        c = dg.clustering_coefficient()
-        return(c,d)
-    except:
-        return
     
 def SomeDistributions(results):
     c = Cdf.MakeCdfFromList(vs)
@@ -183,12 +141,18 @@ def SomeDistributions(results):
     
 
 def compare_wikipedia_to_ba():
+    """
+    For wikipedia articles of at least 4000 vertices, builds a graph of
+    k vs P(k), and finds line of best fit. Also builds this same graph
+    for a Barabasi Albert graph on the same number of vertices.
+    """
     indices = load_object_from_file('../Graphs/indices.txt')
     graphs = []
     for index in indices:
         try:
             results = load_object_from_file('../Results/' + index[6:] + '_results.txt')
-            if results.vertices > 4000:
+            if results.vertices >= 3700:
+                print index[6:]
                 graph = load_object_from_file('../Graphs/' + index[6:] + '_graph.txt')
                 graphs.append((index[6:], graph))
         except:
@@ -229,7 +193,7 @@ def compare_wikipedia_to_ba():
         
         #transform fit line, to plot it on log-log scale
         fit_y_log = [math.exp(1) ** f for f in fit_y]
-        
+        pyplot.clf()
         pyplot.plot(xs, ys, 'o')
         pyplot.plot(xs, fit_y_log,'r--',linewidth=4)
         pyplot.xscale('log')
@@ -242,6 +206,7 @@ def compare_wikipedia_to_ba():
         pyplot.savefig(title)
         
         pyplot.clf()
+
         #BA graph w/ same # of vs; show that coefficient is the same
         vs = graph.vertices()
         bag = BADirectedGraph(5)
@@ -290,8 +255,20 @@ def compare_wikipedia_to_ba():
         pyplot.savefig(title)
 
         
-
+def vertices_vs_has_knot():
+    cs, ks, vs, es = GetResultList()
+    xs, ys = [], []
+    for c, k in zip(cs, ks):
+        xs.append(c)
+        if k: ys.append(1)
+        else: ys.append(-1)
+        
+    pyplot.plot(xs, ys, 'o')
+    pyplot.show()
         
 
 if __name__ == '__main__':
     compare_wikipedia_to_ba()
+    #ShowBinnedKnots()
+    #vertices_vs_pknot()
+    #vertices_vs_has_knot()
