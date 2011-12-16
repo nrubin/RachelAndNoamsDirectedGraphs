@@ -158,7 +158,7 @@ def compare_wikipedia_to_ba():
         except:
             pass
             
-    for name, graph in graphs:
+    for name, graph in graphs[:3]:
         #build list of in degree, out degree, total of each vertex
         ins, outs, totals = [], [], []
         for vertex in graph.vertices():
