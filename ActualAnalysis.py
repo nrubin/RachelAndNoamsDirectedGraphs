@@ -95,12 +95,16 @@ def BinnedKnots(zipped,numBins):
     return returnDict, binSize
 
 def ShowBinnedKnots():
-    d, bin_size = BinnedKnots(zip(cs,k),10)
+    cs, k, vs, es = GetResultList()
+    d, bin_size = BinnedKnots(zip(vs,k),5000)
     x = []
     y = []
     for key, val in d.items():
         x.append(key)
         y.append(val)
+    for i in range(len(y)):
+		if y[i] < 1.0:
+			y[i] = -1.0
     pyplot.bar(x, y,bin_size,facecolor='r')
     pyplot.xlabel('Clustering Coefficient')
     pyplot.ylabel('p')
@@ -228,7 +232,7 @@ def compare_wikipedia_to_ba():
         pyplot.xscale('log')
         pyplot.xlabel('k')
         pyplot.ylabel('P(k)')
-        title = 
+        #~ title = 
         pyplot.title('Proof that Wikpedia is Scale Free')
         pyplot.yscale('log')
         pyplot.show()
@@ -239,4 +243,4 @@ def compare_wikipedia_to_ba():
         
 
 if __name__ == '__main__':
-    compare_wikipedia_to_ba()
+    ShowBinnedKnots()
