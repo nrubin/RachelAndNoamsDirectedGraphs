@@ -54,7 +54,7 @@ def getpvalue(distribution,sample1,sample2,condition,numiter=1000):
     return float(numTrue) / float(numiter)
 
 def binData(data,numBins):
-	maxVal = max(data)
+    maxVal = max(data)
     minVal = min(data)
     binSize = (maxVal - minVal) / float(numBins)
     binDict = {}

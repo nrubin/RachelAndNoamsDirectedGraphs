@@ -9,6 +9,7 @@ from DirectedGraph import *
 import math
 from multiprocessing import Pool
 import StatTools
+import correlation
 
 def GetResultList():
     """
@@ -147,17 +148,16 @@ def compare_wikipedia_to_ba():
     for a Barabasi Albert graph on the same number of vertices.
     """
     indices = load_object_from_file('../Graphs/indices.txt')
-    graphs = []
     for index in indices:
         try:
             results = load_object_from_file('../Results/' + index[6:] + '_results.txt')
             if results.vertices >= 3700:
-                print index[6:]
+                #~ print index[6:]
                 graph = load_object_from_file('../Graphs/' + index[6:] + '_graph.txt')
                 graphs.append((index[6:], graph))
         except:
             pass
-            
+           
     for name, graph in graphs[:3]:
         #build list of in degree, out degree, total of each vertex
         ins, outs, totals = [], [], []
@@ -254,6 +254,162 @@ def compare_wikipedia_to_ba():
         title = 'out_degree_BA_on_' + str(len(vs)) +'_vertices'
         pyplot.savefig(title)
 
+def three_graph_subplot():
+    indices = load_object_from_file('../Graphs/indices.txt')
+    graphs = []
+    for index in indices:
+        try:
+            results = load_object_from_file('../Results/' + index[6:] + '_results.txt')
+            if results.vertices >= 5200:
+                graph = load_object_from_file('../Graphs/' + index[6:] + '_graph.txt')
+                graphs.append((index[6:], graph))
+        except:
+            pass
+    subplot_count = 1        
+    name, graph = graphs[0]
+    #build list of in degree, out degree, total of each vertex
+    ins, outs, totals = [], [], []
+    for vertex in graph.vertices():
+        deg_in = graph.in_degree(vertex)
+        deg_out = graph.out_degree(vertex)
+        deg_tot = deg_in + deg_out
+        
+        ins.append(deg_in)
+        outs.append(deg_out)
+        totals.append(deg_tot)
+    in_out = []
+    for item in zip(ins,outs):
+        if item[0] < 1 or item[1] < 1:
+            continue
+        else:
+            in_out.append(item[0]/float(item[1]))
+    c = Cdf.MakeCdfFromList(in_out)
+    x, y = c.Render()
+    pyplot.plot(x,y,'o')
+    pyplot.xscale('log')
+    print numpy.mean(in_out)
+    print numpy.median(in_out)
+    #~ pyplot.yscale('log')
+    #~ pyplot.plot(ins,outs,'o')
+    #~ pyplot.xlabel('in-degree')
+    #~ pyplot.ylabel('out-degree')
+    #~ pyplot.xscale('log')
+    #~ pyplot.yscale('log')
+    #~ print correlation.Corr(ins,outs)
+    #~ print correlation.SpearmanCorr(ins,outs)
+    #~ xs_log0 = []
+    #~ ys_log0 = []
+    #~ for x in ins:
+        #~ if x <= 0:
+            #~ xs_log0.append(.00001)
+        #~ else:
+            #~ xs_log0.append(math.log(x))
+    #~ for y in outs:
+        #~ if y <= 0:
+            #~ ys_log0.append(.00001)
+        #~ else:
+            #~ ys_log0.append(math.log(y))
+    #~ print correlation.Corr(xs_log0,ys_log0)
+    #~ print correlation.SpearmanCorr(xs_log0,ys_log0)
+    #~ coefs = numpy.lib.polyfit(xs_log0, ys_log0, 1)
+    #~ print coefs
+    #~ fit_y0 = numpy.lib.polyval(coefs, xs_log0)
+    #~ fit_y_log0 = [math.exp(1) ** f for f in fit_y0]
+    #~ pyplot.plot(ins, fit_y_log0,'r--',linewidth=4)
+    #create a pmf of degrees
+    #~ pmf0 = Pmf.MakePmfFromList(ins)
+    #~ xs0, ys0 = pmf0.Render()
+    #~ 
+    #~ pmf1 = Pmf.MakePmfFromList(outs)
+    #~ xs1, ys1 = pmf1.Render()
+    #~ 
+    #~ pmf2 = Pmf.MakePmfFromList(totals)
+    #~ xs2, ys2 = pmf2.Render()
+    #~ 
+    #~ #convert to log, so we can find line of best fit
+    #~ xs_log0 = []
+    #~ ys_log0 = []
+    #~ for x in xs0:
+        #~ if x <= 0:
+            #~ xs_log0.append(.00001)
+        #~ else:
+            #~ xs_log0.append(math.log(x))
+    #~ for y in ys0:
+        #~ if y <= 0:
+            #~ ys_log0.append(.00001)
+        #~ else:
+            #~ ys_log0.append(math.log(y))
+    #~ coefs = numpy.lib.polyfit(xs_log0, ys_log0, 1)
+    #~ fit_y0 = numpy.lib.polyval(coefs, xs_log0)
+    #~ 
+   #~ #convert to log, so we can find line of best fit
+    #~ xs_log1 = []
+    #~ ys_log1 = []
+    #~ for x in xs1:
+        #~ if x <= 0:
+            #~ xs_log1.append(.00001)
+        #~ else:
+            #~ xs_log1.append(math.log(x))
+    #~ for y in ys1:
+        #~ if y <= 0:
+            #~ ys_log1.append(.00001)
+        #~ else:
+            #~ ys_log1.append(math.log(y))
+    #~ coefs = numpy.lib.polyfit(xs_log1, ys_log1, 1)
+    #~ fit_y1 = numpy.lib.polyval(coefs, xs_log1)
+    #~ 
+   #~ #convert to log, so we can find line of best fit
+    #~ xs_log2 = []
+    #~ ys_log2 = []
+    #~ for x in xs2:
+        #~ if x <= 0:
+            #~ xs_log2.append(.00001)
+        #~ else:
+            #~ xs_log2.append(math.log(x))
+    #~ for y in ys2:
+        #~ if y <= 0:
+            #~ ys_log2.append(.00001)
+        #~ else:
+            #~ ys_log2.append(math.log(y))
+    #~ coefs = numpy.lib.polyfit(xs_log2, ys_log2, 1)
+    #~ fit_y2 = numpy.lib.polyval(coefs, xs_log2)
+    
+    #transform fit line, to plot it on log-log scale
+    #~ pyplot.subplot(1,3,1)
+    #~ fit_y_log0 = [math.exp(1) ** f for f in fit_y0]
+    #~ pyplot.plot(xs0, ys0, 'o')
+    #~ pyplot.plot(xs0, fit_y_log0,'r--',linewidth=4)
+    #~ pyplot.xscale('log')
+    #~ pyplot.yscale('log')
+    #~ pyplot.ylabel('P(k)',fontsize=25)
+    #~ 
+    #~ pyplot.subplot(1,3,2)
+    #~ fit_y_log1 = [math.exp(1) ** f for f in fit_y1]
+    #~ pyplot.plot(xs1, ys1, 'o')
+    #~ pyplot.plot(xs1, fit_y_log1,'r--',linewidth=4)
+    #~ pyplot.xscale('log')
+    #~ pyplot.yscale('log')
+    #~ pyplot.xlabel('k',fontsize=25)
+    #~ 
+    #~ pyplot.subplot(1,3,3)
+    #~ fit_y_log2 = [math.exp(1) ** f for f in fit_y2]
+    #~ pyplot.plot(xs2, ys2, 'o')
+    #~ pyplot.plot(xs2, fit_y_log2,'r--',linewidth=4)
+    #~ pyplot.xscale('log')
+    #~ pyplot.yscale('log')
+    
+    #~ if subplot_count == 1:
+        #~ pyplot.ylabel('P(k)',fontsize=25)
+    #~ if subplot_count == 2:
+        #~ pyplot.xlabel('k',fontsize=25)
+
+
+    #pyplot.show()
+    #~ title = 'total_degree_' + name
+    #~ subplot_count += 1
+    pyplot.show()
+    #~ pyplot.savefig()
+    
         
 def vertices_vs_has_knot():
     cs, ks, vs, es = GetResultList()
@@ -268,7 +424,4 @@ def vertices_vs_has_knot():
         
 
 if __name__ == '__main__':
-    compare_wikipedia_to_ba()
-    #ShowBinnedKnots()
-    #vertices_vs_pknot()
-    #vertices_vs_has_knot()
+    print three_graph_subplot()
