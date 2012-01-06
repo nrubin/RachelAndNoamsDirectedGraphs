@@ -50,7 +50,7 @@ def PlotData(data):
 def GetDataForGraphs():
     db=MySQLdb.connect(host='mysql.coryis.me' ,user='reptar', passwd="sweetness",db="cory_main")
     c=db.cursor()
-    query = 'SELECT page.page_title, pagelinks.pl_title FROM pagelinks JOIN page ON pagelinks.pl_from = page.page_id'
+    query = 'SELECT page.page_title, pagelinks.pl_title FROM pagelinks JOIN page ON pagelinks.pl_from = page.page_id LIMIT 0, 10000'
     c.execute(query)
     data = c.fetchall()
     return data
@@ -81,4 +81,5 @@ if __name__ == '__main__':
     #~ PlotData(CleanData(GetData()))
     dg = MakeGraph(GetDataForGraphs())
     print len(dg.vertices()), 'Vertices'
-    print dg.has_knot()
+    print len(dg.arcs()), 'Arcs'
+    #~ print dg.has_knot()
